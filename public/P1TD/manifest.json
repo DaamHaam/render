@@ -1,0 +1,21 @@
+{
+    "name": "Salut MONDE",
+    "short_name": "PWA",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#0000FF",
+    "background_color": "#00FF00",
+    "icons": [
+      {
+        "src": "/icon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  
