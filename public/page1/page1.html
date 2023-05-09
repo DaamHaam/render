@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Chronomètre fauteuil</title>
+    <!-- plein ecran android -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <!-- plein ecran ios -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- pas encore d'icone -->
+    <!-- <link rel="apple-touch-icon" href="path/to/icon.png"> -->
+    <!-- style de la barre de status -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- container remplit à partir du bas de body via flexbox -->
+    <div class="container">
+        <!-- pas de titre -->
+        <!-- <h1>Chronomètre fauteuil</h1> -->
+
+        <button id="reset">RESET</button>
+        <hr>
+        <h2 id="titres">MOYENNES</h2>
+        <div class="scores">
+
+            <h2 id="moyG">00.0</h2>
+            <h2 id="moyD">00.0</h2>
+        </div>
+
+        <hr>
+
+        <h2 id="titres">NOMBRE D'ESSAIS</h2>
+
+        <div class="scores">
+            <h2 id="attemptsL">0</h2>
+            <h2 id="attemptsR">0</h2>
+        </div>
+        <hr>
+
+        <div class="scores">
+            <div class="timer">
+                <h2 id="timerLeft">00.0</h2>
+            </div>
+            <div class="timer">
+                <h2 id="timerRight">00.0</h2>
+            </div>
+        </div>
+
+        <div class="timers">
+            <div class="timer">
+                <button class="btn" id="leftRotation">G</button>
+            </div>
+            <div class="timer">
+                <button class="btn" id="rightRotation">D</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <small class="version">v0.51</small>
+
+</body>
+
+</html>

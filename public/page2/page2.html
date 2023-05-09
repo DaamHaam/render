@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <title>Simple Calculation Exercise</title>
+  <link rel='stylesheet' href='style.css'>
+  <script src='script.js'></script>
+</head>
+
+<body onload="generateQuestion()">
+  <header>
+    <h1>Exercice pour LILOUAN</h1>
+  </header>
+  <section>
+    <p id='question'></p>
+    <form>
+      <input type='text' id='answer' placeholder='Enter answer'>
+      <input type='submit' value='Submit' onclick='submitAnswer(event)'>
+    </form>
+  </section>
+  <footer>
+    <!-- <p>Created by GodmodeGPT</p> -->
+    <p>PAS TROP FACILE</p>
+  </footer>
+
+  <script>
+    // Generate a question and display it to the user
+    function generateQuestion() {
+      let num1 = generateRandomNumber();
+      let num2 = generateRandomNumber();
+      let operator = ["+", "-", "\u00D7", "\u00F7"][Math.floor(Math.random() * 4)];
+      let question = num1 + " " + operator + " " + num2;
+      let questionElement = document.getElementById('question');
+      questionElement.innerText = question;
+    }
+    // Submit an answer and check it
+    function submitAnswer(event) {
+      event.preventDefault();
+      let question = document.getElementById('question').innerText;
+      let userAnswer = document.getElementById('answer').value;
+      let result = checkAnswer(question, userAnswer);
+      alert(result);
+    }
+  </script>
+</body>
+
+</html>
