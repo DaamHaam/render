@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PWA TODO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0000FF">
+  <style>
+    body {
+      color: rgb(22, 121, 207);
+      background-color: rgb(0, 0, 0);
+    }
+    /* cible tous les éléments <li> à l'intérieur d'une liste <ul>. */
+    ul li {
+        text-decoration: none;
+        cursor: pointer;
+    }
+    /* cible les éléments <li> avec la classe "completed" (terme anglais pour "terminé"). */
+    ul li.completed {
+        text-decoration: line-through;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>DAMIEN A FAIRE</h1>
+
+  <h2>Chaque jour... eh oui :)</h2>
+  <ul>
+    <li>Boire 500ml MATIN</li>
+    <li>Boire 500ml APREM</li>
+    <li>ELASTIQUE RENFO</li>
+  </ul>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
+  <!-- script = sélectionne les éléments de la liste et leur affecte l'état complété ou pas selon click -->
+  <script src="script.js"></script>
+</body>
+</html>
