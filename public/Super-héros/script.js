@@ -17,7 +17,7 @@ function getSelectedChoice() {
     return null;
 }
 
-// fonction pour envoyer une demande à l'API
+// fonction pour envoyer une demande à l'API via chatCompletion
 async function sendRequest(content) {
     console.log("question envoyée");
     responseEl.classList.add('loading'); // Ajout de la classe "loading" pour l'animation de chargement
@@ -27,18 +27,37 @@ async function sendRequest(content) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content })
     });
-    console.log("réponse reçue");
     const data = await response.json();
+
+    // REPONSE
     responseEl.classList.remove('loading'); // Suppression de la classe "loading" une fois la réponse reçue
 
+    // console.log(data.message);
 
+    const jsonData = JSON.parse(data.message);
 
-    // adapter mise en forme réponse
-    let formattedMessage = data.message;
-    formattedMessage = formattedMessage.replace(/\[\[(.*?)\]\]/, '<br>[[$1]]'); // Ajout d'une ligne avant le premier crochet
-    formattedMessage = formattedMessage.replace(/\[\[(.*?)\]\]/g, function (match, p1) {
-        return '<br><b>' + p1 + '</b><br>';
-    });
+    let formattedMessage = "";
+
+    // verifie que les cles sont presentes avant
+    if (jsonData.histoire) {
+        formattedMessage += jsonData.histoire;
+    }
+
+    // console.log("Histoire : " + jsonData.histoire);
+
+    if (jsonData.choixA) {
+        formattedMessage += "<br><br><b>" + "A) " + jsonData.choixA + "</b>";
+    }
+    console.log("choixA : " + jsonData.choixA);
+
+    if (jsonData.choixB) {
+        formattedMessage += "<br><br><b>" + "B) " + jsonData.choixB + "</b>";
+    }
+
+    if (jsonData.choixC) {
+        formattedMessage += "<br><br><b>" + "C) " + jsonData.choixC + "</b>";
+    }
+    // console.log("formattedMessage" + formattedMessage);
 
     // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
     responseEl.innerHTML = formattedMessage;
@@ -95,7 +114,7 @@ submitEl.addEventListener('click', async () => {
 
 
     } else {
-        // Sinon, envoyer la question
+        // Sinon, envoyer la question avec la valeur lettre ABC
         const content = questionEl.value;
         sendRequest(content);
     }
