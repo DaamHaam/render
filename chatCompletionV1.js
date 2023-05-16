@@ -20,8 +20,8 @@ let conversationHistory = [];
 
 // fonction à appeler d'ailleurs
 async function getCompletion(content) {
-    let texteInitial = "Tu es un jeu vidéo textuel. Ecris une histoire de dix à douze lignes puis propose moi 3 choix d'actions pour le héros (A/, B/ et C/), sans me raconter la suite au premier message, laisse moi juste 3 choix. Dans ta réponse met chaque choix entre double crochets par exemple [[A/ agir comme cela...]]. L'histoire se déroule dans l'univers du héros, et ce héros est : ";
-    let texteEtape = " est ma réponse. Continue l'histoire en quatre à six lignes, puis propose moi 3 choix d'actions A) B) C) pour la suite."
+    let texteInitial = "Tu es un jeu vidéo textuel. Invente un scénario de trois lignes et propose moi 3 options pour la suite de l'histoire (A/, B/ et C/), sans me raconter la suite au premier message, laisse moi juste 4 choix. La scène se passe dans le monde de : ";
+    let texteEtape = " est ma réponse, poursuis l'histoire en trois lignes puis propose moi 3 choix A) B) C) pour la suite"
     // Add texteCache only at the beginning of the conversation
     if (conversationHistory.length === 0) {
         content = texteInitial + content;
@@ -51,11 +51,4 @@ async function getCompletion(content) {
     // return ("voilà votre question : " + content + " // et la réponse ? ...");
 }
 
-function resetConversation() {
-    console.log("Historique de conversation : " + conversationHistory);
-    conversationHistory = [];
-    console.log("conversation effacée");
-}
-
-
-module.exports = { getCompletion, resetConversation };
+module.exports = { getCompletion };

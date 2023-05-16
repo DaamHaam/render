@@ -5,7 +5,7 @@ const fs = require('fs');
 
 
 // route vers la fonction chatcompletion
-const { getCompletion } = require('./chatCompletion.js');
+const { getCompletion, resetConversation } = require('./chatCompletion');
 
 // Pour analyser le corps des requêtes JSON
 app.use(express.json());
@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'page4', 'indexRacine.html'));
 });
 
-// Route pour l'API OpenAI
+// Route pour l'API OpenAI 
 app.post('/api/completion', async (req, res) => {
   const content = req.body.content;
   try {
@@ -36,6 +36,17 @@ app.post('/api/completion', async (req, res) => {
     res.status(500).json({ error: 'Une erreur est survenue lors de la communication avec OpenAI' });
   }
 });
+
+app.post('/api/reset', (req, res) => {
+  try {
+    resetConversation();
+    res.status(200).json({ message: 'La conversation a été réinitialisée' });
+  } catch (error) {
+    res.status(500).json({ error: 'Une erreur est survenue lors de la réinitialisation de la conversation' });
+  }
+});
+
+
 
 
 // crée une route pour récupérer les noms des répertoires dans le dossier 'public'

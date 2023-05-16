@@ -6,20 +6,6 @@ const questionEl = document.getElementById('question');
 const submitEl = document.getElementById('submit');
 const responseEl = document.getElementById('response');
 
-// gestionnaire d'événement pour le bouton submit
-// ancienne méthode sans fetch
-// submitEl.addEventListener('click', async () => {
-//     // obtenir la question
-//     const question = questionEl.value;
-//     // obtenir la réponse de GPT-3
-//     console.log("question envoyée");
-//     const response = await getCompletion(question);
-//     // afficher la réponse
-//     console.log("réponse affichée");
-
-//     responseEl.textContent = response;
-// });
-
 
 submitEl.addEventListener('click', async () => {
     console.log("question envoyée");
