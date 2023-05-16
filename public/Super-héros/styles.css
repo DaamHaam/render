@@ -1,0 +1,87 @@
+  /* styles CSS pour les gros boutons et le texte */
+  * {
+      margin: 0;
+      padding: 0;
+      /* box-sizing: border-box; */
+  }
+
+  body {
+      /* min-width: 300px; */
+
+      font-family: Arial, sans-serif;
+      font-size: 20px;
+      background-color: #494d6b;
+      /* couleur de fond pour tout le corps */
+  }
+
+  @media screen and (min-width: 500px) {
+      body {
+          /* styles pour les écrans plus larges ici */
+          min-width: 500px;
+      }
+  }
+
+  .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+      border-radius: 15px;
+      /* ajout de coins arrondis */
+      box-shadow: 0 2px 5px rgba(48, 139, 219, 0.3);
+      /* ombre autour du conteneur */
+      background-color: #d3e0ee;
+      /* couleur de fond pour le conteneur */
+  }
+
+  button {
+      padding: 15px;
+      font-size: 20px;
+      margin-top: 20px;
+      background-color: #007BFF;
+      /* couleur de fond pour le bouton */
+      color: #fff;
+      /* couleur du texte du bouton */
+      border: none;
+      /* enlève la bordure par défaut */
+      border-radius: 5px;
+      /* coins arrondis pour le bouton */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      /* ombre autour du bouton */
+      cursor: pointer;
+      /* change le curseur lorsque vous survolez le bouton */
+  }
+
+  button:hover {
+      background-color: #0056b3;
+      /* change la couleur de fond lorsqu'on survole le bouton */
+  }
+
+  #response {
+      margin-top: 20px;
+      height: 50%;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow: auto;
+      border-radius: 5px;
+      /* coins arrondis pour la zone de réponse */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      /* ombre légère autour de la zone de réponse */
+  }
+
+  #question,
+  #submit {
+      width: 100%;
+      /* prend toute la largeur de l'élément parent */
+      box-sizing: border-box;
+      /* s'assure que la bordure et le padding sont inclus dans la largeur */
+      height: 50px;
+      /* fait en sorte que l'input et le bouton aient la même hauteur */
+
+  }
+
+  #question {
+      font-size: 1.4rem;
+  }
