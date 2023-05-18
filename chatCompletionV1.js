@@ -1,5 +1,8 @@
 
 
+// Utilisez ces variables comme vous le faisiez avant
+
+
 // commonJS à nouveau
 const { config } = require("dotenv");
 config();

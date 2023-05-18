@@ -20,6 +20,14 @@ function getSelectedChoice() {
 // fonction pour envoyer une demande à l'API via chatCompletion
 async function sendRequest(content) {
     console.log("question envoyée");
+
+    // mettre le bouton en mode RESET
+    resetMode = true;
+    questionEl.disabled = true;
+    submitEl.style.backgroundColor = "#F2880C" // change la couleur de fond en rouge
+    submitEl.style.color = "white"; // change la couleur du texte en blanc
+    submitEl.textContent = 'Recommencer';
+
     responseEl.classList.add('loading'); // Ajout de la classe "loading" pour l'animation de chargement
 
     const response = await fetch('/api/completion', {
@@ -65,12 +73,7 @@ async function sendRequest(content) {
 
     // responseEl.textContent = data.message;
 
-    // mettre le bouton en mode RESET
-    resetMode = true;
-    questionEl.disabled = true;
-    submitEl.style.backgroundColor = "#F2880C" // change la couleur de fond en rouge
-    submitEl.style.color = "white"; // change la couleur du texte en blanc
-    submitEl.textContent = 'Recommencer';
+
 
 
     // Ajout pour déselectionner les boutons radio
