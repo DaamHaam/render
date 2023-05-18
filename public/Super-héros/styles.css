@@ -46,9 +46,9 @@
       /* couleur du texte du bouton */
       border: none;
       /* enlève la bordure par défaut */
-      border-radius: 5px;
+      border-radius: 45px;
       /* coins arrondis pour le bouton */
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 5px rgba(255, 255, 255, 0.3);
       /* ombre autour du bouton */
       cursor: pointer;
       /* change le curseur lorsque vous survolez le bouton */
@@ -67,7 +67,7 @@
       overflow: auto;
       border-radius: 5px;
       /* coins arrondis pour la zone de réponse */
-      box-shadow: 0 2px 5px rgba(176, 153, 153, 0.1);
+      box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
       /* ombre légère autour de la zone de réponse */
       color: rgb(0, 0, 0);
       background-color: #fff;
@@ -116,7 +116,7 @@
 
   .loading::after {
       content: '';
-      display: inline-block;
+      display: block;
       width: 20px;
       height: 20px;
       border: 2px solid #000000;

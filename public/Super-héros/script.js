@@ -65,6 +65,8 @@ async function sendRequest(content) {
     if (jsonData.choixC) {
         formattedMessage += "<br><br><b>" + "C) " + jsonData.choixC + "</b>";
     }
+    // rajout d'une ligne vide à la fin
+    formattedMessage += "<br>";
     // console.log("formattedMessage" + formattedMessage);
 
     // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
