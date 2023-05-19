@@ -8,14 +8,14 @@ let resetMode = false; // état du bouton
 
 // fonction pour obtenir le choix sélectionné
 // a enlever si inutile
-function getSelectedChoice() {
-    for (let i = 0; i < choicesEl.length; i++) {
-        if (choicesEl[i].checked) {
-            return choicesEl[i].value;
-        }
-    }
-    return null;
-}
+// function getSelectedChoice() {
+//     for (let i = 0; i < choicesEl.length; i++) {
+//         if (choicesEl[i].checked) {
+//             return choicesEl[i].value;
+//         }
+//     }
+//     return null;
+// }
 
 // fonction pour envoyer une demande à l'API via chatCompletion
 async function sendRequest(content) {
@@ -72,10 +72,16 @@ async function sendRequest(content) {
     // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
     responseEl.innerHTML = formattedMessage;
 
-
-    // responseEl.textContent = data.message;
-
-
+    // Copiez le texte dans le presse-papier
+    // a tester sur smartphone avant d'enlever
+    navigator.clipboard.writeText(formattedMessage)
+        .then(() => {
+            console.log('Text copied to clipboard');
+        })
+        .catch(err => {
+            // Cela pourrait échouer si l'utilisateur refuse de permettre l'accès au presse-papier
+            console.error('Could not copy text: ', err);
+        });
 
 
     // Ajout pour déselectionner les boutons radio
