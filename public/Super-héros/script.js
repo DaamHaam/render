@@ -6,17 +6,6 @@ const choicesEl = document.getElementsByName('choice');
 
 let resetMode = false; // état du bouton
 
-// fonction pour obtenir le choix sélectionné
-// a enlever si inutile
-// function getSelectedChoice() {
-//     for (let i = 0; i < choicesEl.length; i++) {
-//         if (choicesEl[i].checked) {
-//             return choicesEl[i].value;
-//         }
-//     }
-//     return null;
-// }
-
 // fonction pour envoyer une demande à l'API via chatCompletion
 async function sendRequest(content) {
     console.log("question envoyée");
@@ -42,6 +31,8 @@ async function sendRequest(content) {
 
     // console.log(data.message);
 
+    console.log("Tentative de parsing de JSON : ", data.message);
+
     const jsonData = JSON.parse(data.message);
 
     let formattedMessage = "";
@@ -53,16 +44,16 @@ async function sendRequest(content) {
 
     // console.log("Histoire : " + jsonData.histoire);
 
-    if (jsonData.choixA) {
+    if (jsonData.choixA && jsonData.choixA !== "0") {
         formattedMessage += "<br><br><b>" + "A) " + jsonData.choixA + "</b>";
     }
-    console.log("choixA : " + jsonData.choixA);
+    // console.log("choixA : " + jsonData.choixA);
 
-    if (jsonData.choixB) {
+    if (jsonData.choixB && jsonData.choixB !== "0") {
         formattedMessage += "<br><br><b>" + "B) " + jsonData.choixB + "</b>";
     }
 
-    if (jsonData.choixC) {
+    if (jsonData.choixC && jsonData.choixC !== "0") {
         formattedMessage += "<br><br><b>" + "C) " + jsonData.choixC + "</b>";
     }
     // rajout d'une ligne vide à la fin
