@@ -2,7 +2,8 @@
 const questionEl = document.getElementById('question');
 const submitEl = document.getElementById('submit');
 const responseEl = document.getElementById('response');
-const choicesEl = document.getElementsByName('choice');
+// anciens boutons
+const radioChoicesEl = document.getElementsByName('choice');
 
 let resetMode = false; // état du bouton
 
@@ -33,6 +34,9 @@ async function sendRequest(content) {
 
     console.log("Tentative de parsing de JSON : ", data.message);
 
+    // Copiez le texte dans le presse-papier
+    // copyClipboard();
+
     const jsonData = JSON.parse(data.message);
 
     let formattedMessage = "";
@@ -44,26 +48,91 @@ async function sendRequest(content) {
 
     // console.log("Histoire : " + jsonData.histoire);
 
+
+    // NOUVELLE FACON
     if (jsonData.choixA && jsonData.choixA !== "0") {
-        formattedMessage += "<br><br><b>" + "A) " + jsonData.choixA + "</b>";
+        formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
     }
-    // console.log("choixA : " + jsonData.choixA);
-
     if (jsonData.choixB && jsonData.choixB !== "0") {
-        formattedMessage += "<br><br><b>" + "B) " + jsonData.choixB + "</b>";
+        formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
     }
-
     if (jsonData.choixC && jsonData.choixC !== "0") {
-        formattedMessage += "<br><br><b>" + "C) " + jsonData.choixC + "</b>";
+        formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br><br>";
     }
-    // rajout d'une ligne vide à la fin
-    formattedMessage += "<br>";
-    // console.log("formattedMessage" + formattedMessage);
 
     // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
     responseEl.innerHTML = formattedMessage;
 
-    // Copiez le texte dans le presse-papier
+    // Ajouter un écouteur d'événements click à chaque choix
+    // const choicesElN = document.getElementsByClassName('choiceN');
+    // for (let i = 0; i < choicesElN.length; i++) {
+    //     choicesElN[i].addEventListener('click', () => {
+    //         sendRequest(choicesElN[i].id.slice(-1));  // Envoie la dernière lettre de l'id (A, B ou C)
+    //     });
+    // }
+
+    // Ajouter un écouteur d'événements click à chaque choix
+    const choices = document.getElementsByClassName('choiceN');
+    for (let i = 0; i < choices.length; i++) {
+        choices[i].addEventListener('click', () => {
+            // Envoie la dernière lettre de l'id (A, B ou C) à sendRequest
+            sendRequest(choices[i].id.slice(-1));
+
+            // Supprime la classe "selected" de tous les choix
+            for (let j = 0; j < choices.length; j++) {
+                choices[j].classList.remove('selected');
+            }
+
+            // Ajoute la classe "selected" au choix cliqué
+            choices[i].classList.add('selected');
+        });
+    }
+
+
+    // A R E
+
+    // if (jsonData.choixA && jsonData.choixA !== "0") {
+    //     formattedMessage += "<br><br><b>" + "A) " + jsonData.choixA + "</b>";
+    // }
+    // // console.log("choixA : " + jsonData.choixA);
+
+    // if (jsonData.choixB && jsonData.choixB !== "0") {
+    //     formattedMessage += "<br><br><b>" + "B) " + jsonData.choixB + "</b>";
+    // }
+
+    // if (jsonData.choixC && jsonData.choixC !== "0") {
+    //     formattedMessage += "<br><br><b>" + "C) " + jsonData.choixC + "</b>";
+    // }
+    // // rajout d'une ligne vide à la fin
+    // formattedMessage += "<br>";
+    // // console.log("formattedMessage" + formattedMessage);
+
+    // // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
+    // responseEl.innerHTML = formattedMessage;
+
+
+    // // Ajout pour déselectionner les boutons radio
+    // const radios = document.getElementsByName('choice');
+    // for (let i = 0; i < radios.length; i++) {
+    //     radios[i].checked = false;
+    // }
+
+
+
+
+
+
+
+}
+
+// Add "change" event listener to each choice
+// for (let i = 0; i < choicesEl.length; i++) {
+//     choicesEl[i].addEventListener('change', () => {
+//         sendRequest(choicesEl[i].value);
+//     });
+// }
+
+function copyClipboard() {
     // a tester sur smartphone avant d'enlever
     navigator.clipboard.writeText(formattedMessage)
         .then(() => {
@@ -74,19 +143,6 @@ async function sendRequest(content) {
             console.error('Could not copy text: ', err);
         });
 
-
-    // Ajout pour déselectionner les boutons radio
-    const radios = document.getElementsByName('choice');
-    for (let i = 0; i < radios.length; i++) {
-        radios[i].checked = false;
-    }
-}
-
-// Add "change" event listener to each choice
-for (let i = 0; i < choicesEl.length; i++) {
-    choicesEl[i].addEventListener('change', () => {
-        sendRequest(choicesEl[i].value);
-    });
 }
 
 submitEl.addEventListener('click', async () => {
@@ -100,11 +156,12 @@ submitEl.addEventListener('click', async () => {
         submitEl.style.color = ""; // réinitialise la couleur du texte
         responseEl.textContent = '';
         questionEl.value = '';
-        for (let i = 0; i < choicesEl.length; i++) {
-            choicesEl[i].checked = false;
-        }
 
-        // ré-initialiser la conversation
+        // anciens boutons radio
+        // for (let i = 0; i < choicesEl.length; i++) {
+        //     choicesEl[i].checked = false;
+        // }
+
         // ré-initialiser la conversation
         fetch('/api/reset', {
             method: 'POST'
@@ -116,7 +173,7 @@ submitEl.addEventListener('click', async () => {
 
 
     } else {
-        // Sinon, envoyer la question avec la valeur lettre ABC
+        // Sinon, envoyer la question avec la valeur dans question
         const content = questionEl.value;
         sendRequest(content);
     }

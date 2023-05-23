@@ -47,8 +47,6 @@ app.post('/api/reset', (req, res) => {
 });
 
 
-
-
 // crée une route pour récupérer les noms des répertoires dans le dossier 'public'
 app.get('/api/directories', (req, res) => {
   fs.readdir(path.join(__dirname, 'public'), (err, files) => {

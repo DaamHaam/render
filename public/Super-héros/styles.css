@@ -109,6 +109,23 @@
   }
 
 
+  .choiceN {
+      border: 2px solid #F2880C;
+      padding: 10px;
+      margin: 0px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  }
+
+  .choiceN:active {
+      background-color: #ddd;
+  }
+
+  .choiceN.selected {
+      background-color: #F2880C;
+  }
+
 
   #question {
       font-size: 1.4rem;
