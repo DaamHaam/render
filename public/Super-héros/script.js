@@ -57,7 +57,7 @@ async function sendRequest(content) {
         formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
     }
     if (jsonData.choixC && jsonData.choixC !== "0") {
-        formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br><br>";
+        formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
     }
 
     // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
@@ -85,6 +85,12 @@ async function sendRequest(content) {
 
             // Ajoute la classe "selected" au choix cliqué
             choices[i].classList.add('selected');
+
+            // Désactive tous les choix
+            for (let j = 0; j < choices.length; j++) {
+                choices[j].style.pointerEvents = 'none';
+            }
+
         });
     }
 

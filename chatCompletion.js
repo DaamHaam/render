@@ -51,7 +51,7 @@ async function getCompletion(messageClient) {
     let texteEtape = "Mon choix est noté plus bas entre triple guillements '''. Ecris la suite de l'histoire correspondante à mon choix, en six à huit lignes, puis il faut proposer " + nombreDeChoix + " choix d'actions différents pour le héros, qui seront classés A, B et C. N'écris pas la lettre devant chaque choix.L'un des choix doit être totalement inadapté, déplacé et ridicule. Il devra être placé en position " + badChoiceIndex + ". Ecris la réponse en structure JSON, répartie dans des paires clés-valeur, avec les clés suivantes : histoire, choixA, choixB, choixC, mauvaisChoixA, mauvaisChoixB, mauvaisChoixC. Les valeurs de 'mauvaisChoix' seront des bool true ou false, avec true s'il s'agit du choix inadapté. La partie histoire du JSON ne doit pas contenir les choix. La réponse doit contenir une structure JSON valide : attention à ne pas mettre de virgule après la dernière paire clé-valeur. Mon choix est : ''' " + messageClient + " '''. "
 
 
-    let texteDeFin = "Mon choix est noté plus bas entre triple guillements '''. Ta tâche est à nouveau de répondre au format JSON : c'est la fin de l'histoire il faut la conclure l'histoire, une belle happy-end qui exprime explicitement que le joueur a gagné, sans proposer de nouveaux choix, et termine par la phrase 'Vous avez gagné'. La fin de l'histoire doit être mise dans la clé histoire dans la structure JSON, et les autres clés auront pour valeur '0'. La réponse doit contenir une structure JSON valide, bien mettre les valeurs entre guillemets, attention ne pas mettre de virgule après la dernière paire clé-valeur. Mon choix est : ''' " + messageClient + " '''. "
+    let texteDeFinGagne = "Mon choix est noté plus bas entre triple guillements '''. Ta tâche est à nouveau de répondre au format JSON : c'est la fin de l'histoire il faut la conclure l'histoire, une belle happy-end qui exprime explicitement que le joueur a gagné, sans proposer de nouveaux choix, et termine par la phrase 'Vous avez gagné'. La fin de l'histoire doit être mise dans la clé histoire dans la structure JSON, et les autres clés auront pour valeur '0'. La réponse doit contenir une structure JSON valide, bien mettre les valeurs entre guillemets, attention ne pas mettre de virgule après la dernière paire clé-valeur. Mon choix est : ''' " + messageClient + " '''. "
 
     let texteDeFinPerdue = "Mon choix est noté plus bas entre triple guillements '''. Ta tâche est de raconter la fin de l'histoire, et il faut montrer au joueur comment son dernier choix a entraîné la défaite. La fin doit être dramatique, surprenante, lyrique voire funeste, sans proposer de nouveaux choix, et termine par la phrase 'Vous avez perdu.' La fin de l'histoire doit être dans la clé histoire dans la structure JSON, et les autres clés auront pour valeur '0'. La réponse doit contenir une structure JSON valide, bien mettre les valeurs entre guillemets. La réponse doit contenir une structure JSON valide, attention ne pas mettre de virgule après la dernière paire clé-valeur.Mon choix est : ''' " + messageClient + " '''. ";
 
@@ -62,24 +62,46 @@ async function getCompletion(messageClient) {
     if (conversationHistory.length === 0) {
         contentForGPT = promptInitial;
     }
+    // si ce n'est pas l'étape 1
     else {
-        // si c'est la fin = gagné
-        if (indexQuestion == nombreDeQuestionsMax) {
-            contentForGPT = texteDeFin;
-            messageFinal = "Vous avez gagné.";
-        }
-        // étapes intermédiaires
-        else {
-            // Vérifier si le choix précédent est mauvais
-            if (choixPrecedents[`mauvaisChoix${messageClient}`]) {
-                // Si le choix est mauvais, vous pouvez informer l'utilisateur et lui demander de réessayer
-                contentForGPT = texteDeFinPerdue;
-                messageFinal = "Vous avez perdu.";
-            } else {
+        // Vérifier si le choix précédent est mauvais
+        if (choixPrecedents[`mauvaisChoix${messageClient}`]) {
+            // Si le choix est mauvais
+            contentForGPT = texteDeFinPerdue;
+            // messageFinal = "Vous avez perdu.";
+        } else {
+            // si le choix est bon :
+            // si c'est la fin = gagné
+            if (indexQuestion == nombreDeQuestionsMax) {
+                contentForGPT = texteDeFinGagne;
+                // messageFinal = "Vous avez gagné.";
+            }
+            else {
                 // Si le choix est correct, vous pouvez procéder à l'étape suivante
                 contentForGPT = texteEtape;
             }
+
         }
+
+
+
+        // // si c'est la fin = gagné
+        // if (indexQuestion == nombreDeQuestionsMax) {
+        //     contentForGPT = texteDeFin;
+        //     messageFinal = "Vous avez gagné.";
+        // }
+        // // étapes intermédiaires
+        // else {
+        //     // Vérifier si le choix précédent est mauvais
+        //     if (choixPrecedents[`mauvaisChoix${messageClient}`]) {
+        //         // Si le choix est mauvais, vous pouvez informer l'utilisateur et lui demander de réessayer
+        //         contentForGPT = texteDeFinPerdue;
+        //         messageFinal = "Vous avez perdu.";
+        //     } else {
+        //         // Si le choix est correct, vous pouvez procéder à l'étape suivante
+        //         contentForGPT = texteEtape;
+        //     }
+        // }
     }
 
     //* 
