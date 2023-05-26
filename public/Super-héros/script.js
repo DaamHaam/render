@@ -7,6 +7,12 @@ const radioChoicesEl = document.getElementsByName('choice');
 
 let resetMode = false; // état du bouton
 
+const waitMessage = "-- enfin, pour l'instant, il faut attendre un peu :)";
+
+const appName = "Fantas-IA";
+
+let indexQuestion = 0;
+
 // fonction pour envoyer une demande à l'API via chatCompletion
 async function sendRequest(content) {
     console.log("question envoyée");
@@ -19,6 +25,15 @@ async function sendRequest(content) {
     submitEl.textContent = 'Recommencer';
 
     responseEl.classList.add('loading'); // Ajout de la classe "loading" pour l'animation de chargement
+
+    // si première question
+    if (indexQuestion === 0) {
+        responseEl.innerHTML = getRandomLoadingMessage() + '<br><br><strong>' + '</strong><br><br>' + waitMessage;
+    }
+    indexQuestion += 1;
+
+    // responseEl.classList.add('loadingTXT'); // Ajout de la classe "loading" pour l'animation de chargement
+
 
     const response = await fetch('/api/completion', {
         method: 'POST',
@@ -137,6 +152,15 @@ async function sendRequest(content) {
 //         sendRequest(choicesEl[i].value);
 //     });
 // }
+function getRandomLoadingMessage() {
+    const loadingMessages = [
+        "Plongez dans l'aventure avec notre générateur d'histoires IA : vous êtes le héros, et c'est vous qui décidez du scénario...",
+        "Découvrez une nouvelle dimension de narration interactive avec notre IA : faites l'expérience d'histoires où chaque choix compte...",
+        "Immergez-vous dans des mondes fantastiques façonnés par vous et notre IA : votre histoire, vos choix, votre aventure. Bienvenue dans l'avenir de la narration interactive..."
+    ];
+    const randomIndex = Math.floor(Math.random() * loadingMessages.length);
+    return loadingMessages[randomIndex];
+}
 
 function copyClipboard() {
     // a tester sur smartphone avant d'enlever

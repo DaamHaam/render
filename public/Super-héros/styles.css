@@ -131,8 +131,37 @@
       font-size: 1.4rem;
   }
 
+  /* .loading {
+      position: relative;
+      height: 4px;
+      width: 100%;
+      background-color: #eee;
+  } */
+  /* 
   .loading::after {
-      content: '';
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0;
+      background-color: #000;
+      animation: loading 15s infinite linear;
+  }
+
+  @keyframes loading {
+      0% {
+          width: 0;
+      }
+
+      100% {
+          width: 100%;
+      }
+  } */
+
+
+  .loading::after {
+      content: "";
       display: block;
       width: 20px;
       height: 20px;
@@ -141,6 +170,15 @@
       border-radius: 50%;
       animation: spin 1s infinite linear;
   }
+
+  /* .loadingTXT::after {
+      content: "Chargement... ";
+      display: block;
+      position: absolute;
+      top: 25px;
+      width: 100%;
+      text-align: center;
+  } */
 
   @keyframes spin {
       0% {
