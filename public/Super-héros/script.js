@@ -7,7 +7,7 @@ const radioChoicesEl = document.getElementsByName('choice');
 
 let resetMode = false; // état du bouton
 
-const waitMessage = "-- enfin, pour l'instant, il faut attendre un peu :)..." + "<br>" + "...et recommencer quand ça plante !";
+const waitMessage = "Pour l'instant, il faut attendre un peu :)" + "<br>";
 
 const appName = "Fantas-IA";
 
