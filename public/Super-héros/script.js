@@ -7,7 +7,7 @@ const radioChoicesEl = document.getElementsByName('choice');
 
 let resetMode = false; // état du bouton
 
-const waitMessage = "-- enfin, pour l'instant, il faut attendre un peu :)";
+const waitMessage = "-- enfin, pour l'instant, il faut attendre un peu :)..." + "<br>" + "...et recommencer quand ça plante !";
 
 const appName = "Fantas-IA";
 
@@ -28,7 +28,7 @@ async function sendRequest(content) {
 
     // si première question
     if (indexQuestion === 0) {
-        responseEl.innerHTML = getRandomLoadingMessage() + '<br><br><strong>' + '</strong><br><br>' + waitMessage;
+        responseEl.innerHTML = 'Génération en cours...' + '<br><br><br>' + getRandomLoadingMessage() + '<br><br><br>' + waitMessage;
     }
     indexQuestion += 1;
 
@@ -47,7 +47,7 @@ async function sendRequest(content) {
 
     // console.log(data.message);
 
-    console.log("Tentative de parsing de JSON : ", data.message);
+    console.log("Tentative de parsing de JSON sur script.js : ", data.message);
 
     // Copiez le texte dans le presse-papier
     // copyClipboard();
@@ -56,25 +56,30 @@ async function sendRequest(content) {
 
     let formattedMessage = "";
 
-    // verifie que les cles sont presentes avant
-    if (jsonData.histoire) {
-        formattedMessage += jsonData.histoire;
+    if (jsonData.erreur) {
+        formattedMessage += "ERREUR serveur - cliquer Recommencer";
     }
+    else {
 
-    // console.log("Histoire : " + jsonData.histoire);
+        // verifie que les cles sont presentes avant
+        if (jsonData.histoire) {
+            formattedMessage += jsonData.histoire;
+        }
+
+        // console.log("Histoire : " + jsonData.histoire);
 
 
-    // NOUVELLE FACON
-    if (jsonData.choixA && jsonData.choixA !== "0") {
-        formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
+        // NOUVELLE FACON
+        if (jsonData.choixA && jsonData.choixA !== "0") {
+            formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
+        }
+        if (jsonData.choixB && jsonData.choixB !== "0") {
+            formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
+        }
+        if (jsonData.choixC && jsonData.choixC !== "0") {
+            formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
+        }
     }
-    if (jsonData.choixB && jsonData.choixB !== "0") {
-        formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
-    }
-    if (jsonData.choixC && jsonData.choixC !== "0") {
-        formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
-    }
-
     // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
     responseEl.innerHTML = formattedMessage;
 
