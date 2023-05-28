@@ -3,12 +3,11 @@ const questionEl = document.getElementById('question');
 const submitEl = document.getElementById('submit');
 const responseEl = document.getElementById('response');
 // anciens boutons
-const radioChoicesEl = document.getElementsByName('choice');
+// const radioChoicesEl = document.getElementsByName('choice');
 
 let resetMode = false; // état du bouton
 
 const waitMessage = "Pour l'instant, il faut attendre un peu :)" + "<br>";
-
 const appName = "Fantas-IA";
 
 let indexQuestion = 0;
@@ -16,7 +15,6 @@ let indexQuestion = 0;
 // fonction pour envoyer une demande à l'API via chatCompletion
 async function sendRequest(content) {
     console.log("question envoyée");
-
     // mettre le bouton en mode RESET
     resetMode = true;
     questionEl.disabled = true;
@@ -84,14 +82,6 @@ async function sendRequest(content) {
     responseEl.innerHTML = formattedMessage;
 
     // Ajouter un écouteur d'événements click à chaque choix
-    // const choicesElN = document.getElementsByClassName('choiceN');
-    // for (let i = 0; i < choicesElN.length; i++) {
-    //     choicesElN[i].addEventListener('click', () => {
-    //         sendRequest(choicesElN[i].id.slice(-1));  // Envoie la dernière lettre de l'id (A, B ou C)
-    //     });
-    // }
-
-    // Ajouter un écouteur d'événements click à chaque choix
     const choices = document.getElementsByClassName('choiceN');
     for (let i = 0; i < choices.length; i++) {
         choices[i].addEventListener('click', () => {
@@ -113,50 +103,9 @@ async function sendRequest(content) {
 
         });
     }
-
-
-    // A R E
-
-    // if (jsonData.choixA && jsonData.choixA !== "0") {
-    //     formattedMessage += "<br><br><b>" + "A) " + jsonData.choixA + "</b>";
-    // }
-    // // console.log("choixA : " + jsonData.choixA);
-
-    // if (jsonData.choixB && jsonData.choixB !== "0") {
-    //     formattedMessage += "<br><br><b>" + "B) " + jsonData.choixB + "</b>";
-    // }
-
-    // if (jsonData.choixC && jsonData.choixC !== "0") {
-    //     formattedMessage += "<br><br><b>" + "C) " + jsonData.choixC + "</b>";
-    // }
-    // // rajout d'une ligne vide à la fin
-    // formattedMessage += "<br>";
-    // // console.log("formattedMessage" + formattedMessage);
-
-    // // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
-    // responseEl.innerHTML = formattedMessage;
-
-
-    // // Ajout pour déselectionner les boutons radio
-    // const radios = document.getElementsByName('choice');
-    // for (let i = 0; i < radios.length; i++) {
-    //     radios[i].checked = false;
-    // }
-
-
-
-
-
-
-
 }
 
-// Add "change" event listener to each choice
-// for (let i = 0; i < choicesEl.length; i++) {
-//     choicesEl[i].addEventListener('change', () => {
-//         sendRequest(choicesEl[i].value);
-//     });
-// }
+
 function getRandomLoadingMessage() {
     const loadingMessages = [
         "Plongez dans l'aventure avec notre générateur d'histoires IA : vous êtes le héros, et c'est vous qui décidez du scénario...",
