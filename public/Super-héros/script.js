@@ -2,8 +2,6 @@
 const questionEl = document.getElementById('question');
 const submitEl = document.getElementById('submit');
 const responseEl = document.getElementById('response');
-// anciens boutons
-// const radioChoicesEl = document.getElementsByName('choice');
 
 let resetMode = false; // état du bouton
 
@@ -12,17 +10,17 @@ const appName = "Fantas-IA";
 
 let indexQuestion = 0;
 
+let sessionID = generateSessionId();
+
 // fonction pour envoyer une demande à l'API via chatCompletion
 async function sendRequest(content) {
     console.log("question envoyée");
-    // mettre le bouton en mode RESET
-    resetMode = true;
-    questionEl.disabled = true;
-    submitEl.style.backgroundColor = "#F2880C" // change la couleur de fond en rouge
-    submitEl.style.color = "white"; // change la couleur du texte en blanc
-    submitEl.textContent = 'Recommencer';
 
-    responseEl.classList.add('loading'); // Ajout de la classe "loading" pour l'animation de chargement
+    activateResetMode();
+
+    // responseEl.classList.add('loading'); // Ajout de la classe "loading" pour l'animation de chargement
+
+    startProgressBar();
 
     // si première question
     if (indexQuestion === 0) {
@@ -32,17 +30,16 @@ async function sendRequest(content) {
 
     // responseEl.classList.add('loadingTXT'); // Ajout de la classe "loading" pour l'animation de chargement
 
-
     const response = await fetch('/api/completion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content, sessionID })
     });
     const data = await response.json();
 
     // REPONSE
-    responseEl.classList.remove('loading'); // Suppression de la classe "loading" une fois la réponse reçue
-
+    // responseEl.classList.remove('loading'); // Suppression de la classe "loading" une fois la réponse reçue
+    stopProgressBar();
     // console.log(data.message);
 
     console.log("Tentative de parsing de JSON sur script.js : ", data.message);
@@ -58,16 +55,10 @@ async function sendRequest(content) {
         formattedMessage += "ERREUR serveur - cliquer Recommencer";
     }
     else {
-
         // verifie que les cles sont presentes avant
         if (jsonData.histoire) {
             formattedMessage += jsonData.histoire;
         }
-
-        // console.log("Histoire : " + jsonData.histoire);
-
-
-        // NOUVELLE FACON
         if (jsonData.choixA && jsonData.choixA !== "0") {
             formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
         }
@@ -105,7 +96,6 @@ async function sendRequest(content) {
     }
 }
 
-
 function getRandomLoadingMessage() {
     const loadingMessages = [
         "Plongez dans l'aventure avec notre générateur d'histoires IA : vous êtes le héros, et c'est vous qui décidez du scénario...",
@@ -126,35 +116,25 @@ function copyClipboard() {
             // Cela pourrait échouer si l'utilisateur refuse de permettre l'accès au presse-papier
             console.error('Could not copy text: ', err);
         });
-
 }
 
+// bouton valider / recommencer
 submitEl.addEventListener('click', async () => {
 
     if (resetMode) {
-        // Si le bouton est en mode "RESET", réinitialiser l'interface
-        resetMode = false;
-        questionEl.disabled = false;
-        submitEl.textContent = 'Valider';
-        submitEl.style.backgroundColor = ""; // réinitialise la couleur de fond
-        submitEl.style.color = ""; // réinitialise la couleur du texte
-        responseEl.textContent = '';
-        questionEl.value = '';
-
-        // anciens boutons radio
-        // for (let i = 0; i < choicesEl.length; i++) {
-        //     choicesEl[i].checked = false;
-        // }
-
+        desactivateResetMode();
+        stopProgressBar();
         // ré-initialiser la conversation
         fetch('/api/reset', {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ sessionID })  // inclure l'ID de session dans le corps de la requête
         })
             .then(response => response.json())
             .then(data => console.log(data.message))
             .catch(error => console.error('Une erreur est survenue :', error));
-
-
 
     } else {
         // Sinon, envoyer la question avec la valeur dans question
@@ -162,6 +142,26 @@ submitEl.addEventListener('click', async () => {
         sendRequest(content);
     }
 });
+
+function activateResetMode() {
+    // mettre le bouton en mode RESET
+    resetMode = true;
+    questionEl.disabled = true;
+    submitEl.style.backgroundColor = "#F2880C" // change la couleur de fond en rouge
+    submitEl.style.color = "white"; // change la couleur du texte en blanc
+    submitEl.textContent = 'Recommencer';
+}
+
+function desactivateResetMode() {
+    // Si le bouton est en mode "RESET", réinitialiser l'interface
+    resetMode = false;
+    questionEl.disabled = false;
+    submitEl.textContent = 'Valider';
+    submitEl.style.backgroundColor = ""; // réinitialise la couleur de fond
+    submitEl.style.color = ""; // réinitialise la couleur du texte
+    responseEl.textContent = '';
+    questionEl.value = '';
+}
 
 // Add "keyup" event listener to questionEl POUR TOUCHE ENTREE
 questionEl.addEventListener('keyup', function (event) {
@@ -173,3 +173,22 @@ questionEl.addEventListener('keyup', function (event) {
         submitEl.click();
     }
 });
+
+function startProgressBar() {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.visibility = 'visible';
+    progressBar.style.transition = 'width 18s ease-in-out'; /* Remplit la barre en 15 secondes */
+    progressBar.style.width = '100%';
+}
+
+function stopProgressBar() {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.transition = ''; /* Supprime l'animation */
+    progressBar.style.width = '0%';
+    progressBar.style.visibility = 'hidden';
+}
+
+
+function generateSessionId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}

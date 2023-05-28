@@ -26,25 +26,31 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'page4', 'indexRacine.html'));
 });
 
-// Route pour l'API OpenAI 
+// Route pour ma partie serveur
 app.post('/api/completion', async (req, res) => {
   const content = req.body.content;
+  const sessionID = req.body.sessionID; // Récupérez le sessionID ici
+
   try {
-    const message = await getCompletion(content);
+    const message = await getCompletion(content, sessionID);
     res.json({ message });
   } catch (error) {
     res.status(500).json({ error: 'Une erreur est survenue lors de la communication avec OpenAI' });
   }
 });
 
+
+
 app.post('/api/reset', (req, res) => {
   try {
-    resetConversation();
+    const sessionID = req.body.sessionID;  // Récupérez l'ID de session du corps de la requête
+    resetConversation(sessionID);  // Passez l'ID de session à la fonction resetConversation
     res.status(200).json({ message: 'La conversation a été réinitialisée' });
   } catch (error) {
     res.status(500).json({ error: 'Une erreur est survenue lors de la réinitialisation de la conversation' });
   }
 });
+
 
 
 // crée une route pour récupérer les noms des répertoires dans le dossier 'public'

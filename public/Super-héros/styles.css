@@ -60,7 +60,7 @@
   }
 
   #response {
-      margin-top: 20px;
+      margin-top: 10px;
       flex-grow: 1;
       border: 1px solid #ccc;
       padding: 10px;
@@ -189,6 +189,23 @@
           transform: rotate(360deg);
       }
   }
+
+  #progress-bar {
+      position: relative;
+      top: 0;
+      left: 0;
+      height: 4px;
+      /* Ajustez l'épaisseur de la barre de progression ici */
+      background-color: #F2880C;
+      /* Couleur de la barre de progression */
+      width: 0%;
+      visibility: hidden;
+      z-index: 9999;
+      margin-top: 10px;
+      /* Ajoutez cette ligne */
+
+  }
+
 
   .version {
       position: absolute;
