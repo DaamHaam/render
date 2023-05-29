@@ -29,10 +29,11 @@ app.get('/', (req, res) => {
 // Route pour ma partie serveur
 app.post('/api/completion', async (req, res) => {
   const content = req.body.content;
+  const ageValue = req.body.ageValue; // Récupérez ageValue ici
   const sessionID = req.body.sessionID; // Récupérez le sessionID ici
 
   try {
-    const message = await getCompletion(content, sessionID);
+    const message = await getCompletion(content, ageValue, sessionID);
     res.json({ message });
   } catch (error) {
     res.status(500).json({ error: 'Une erreur est survenue lors de la communication avec OpenAI' });

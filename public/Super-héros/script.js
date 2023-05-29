@@ -4,41 +4,71 @@ const submitEl = document.getElementById('submit');
 const responseEl = document.getElementById('response');
 
 let resetMode = false; // état du bouton
+let ageGroupHTML = `
+<div class="ageGroup">
 
-const waitMessage = "Pour l'instant, il faut attendre un peu :)" + "<br>";
+    <p>Quel âge avez-vous ? (facultatif 🙂) </p> <!-- Titre -->
+
+    <br> <!-- Saut de ligne -->
+
+    <input type="radio" id="age1" name="age" value="4 à 6" class="radioAge">
+    <label for="age1" class="radioLabel">4 à 6 ans</label>
+
+    <br><br> <!-- Sauts de ligne supplémentaires -->
+
+    <input type="radio" id="age2" name="age" value="6 à 8" class="radioAge">
+    <label for="age2" class="radioLabel">6 à 8 ans</label>
+
+    <br><br> <!-- Sauts de ligne supplémentaires -->
+
+    <input type="radio" id="age3" name="age" value="8 à 12" class="radioAge">
+    <label for="age3" class="radioLabel">8 à 12 ans</label>
+
+    <br><br> <!-- Sauts de ligne supplémentaires -->
+
+    <input type="radio" id="age4" name="age" value="12 à 16" class="radioAge">
+    <label for="age4" class="radioLabel">12 à 16 ans</label>
+
+    <br><br> <!-- Sauts de ligne supplémentaires -->
+
+    <input type="radio" id="age5" name="age" value="contenu adulte, plus de 16" class="radioAge">
+    <label for="age5" class="radioLabel">+ de 16 ans</label>
+</div>
+`;
+
+const waitMessage = "Pour l'instant, il faut attendre un peu 😊" + "<br>";
 const appName = "Fantas-IA";
 
 let indexQuestion = 0;
 
+interfaceInitiale();
+
 let sessionID = generateSessionId();
 
 // fonction pour envoyer une demande à l'API via chatCompletion
-async function sendRequest(content) {
+async function sendRequest(content, ageValue) {
     console.log("question envoyée");
 
     activateResetMode();
-
-    // responseEl.classList.add('loading'); // Ajout de la classe "loading" pour l'animation de chargement
 
     startProgressBar();
 
     // si première question
     if (indexQuestion === 0) {
-        responseEl.innerHTML = 'Génération en cours...' + '<br><br><br>' + getRandomLoadingMessage() + '<br><br><br>' + waitMessage;
+        responseEl.innerHTML = 'Génération en cours 🤞...' + '<br><br>' + '<b>' + appName + '</b>' + '<br><br>' + getRandomLoadingMessage() + '<br><br><br>' + waitMessage + getRandomImage()
     }
     indexQuestion += 1;
 
-    // responseEl.classList.add('loadingTXT'); // Ajout de la classe "loading" pour l'animation de chargement
 
     const response = await fetch('/api/completion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, sessionID })
+        body: JSON.stringify({ content, ageValue, sessionID })
     });
     const data = await response.json();
 
     // REPONSE
-    // responseEl.classList.remove('loading'); // Suppression de la classe "loading" une fois la réponse reçue
+
     stopProgressBar();
     // console.log(data.message);
 
@@ -69,6 +99,10 @@ async function sendRequest(content) {
             formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
         }
     }
+
+    // rajoute une image
+    formattedMessage += getRandomImage();
+
     // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
     responseEl.innerHTML = formattedMessage;
 
@@ -124,6 +158,9 @@ submitEl.addEventListener('click', async () => {
     if (resetMode) {
         desactivateResetMode();
         stopProgressBar();
+
+        // remettre questions âge
+        interfaceInitiale();
         // ré-initialiser la conversation
         fetch('/api/reset', {
             method: 'POST',
@@ -139,12 +176,24 @@ submitEl.addEventListener('click', async () => {
     } else {
         // Sinon, envoyer la question avec la valeur dans question
         const content = questionEl.value;
-        sendRequest(content);
+
+        // Obtenir la valeur du bouton radio sélectionné
+        const ageRadios = document.getElementsByClassName('radioAge');
+        let ageValue = "";
+        for (let i = 0; i < ageRadios.length; i++) {
+            if (ageRadios[i].checked) {
+                ageValue = ageRadios[i].value;
+                break;
+            }
+        }
+        console.log(ageValue);
+
+        sendRequest(content, ageValue);
     }
 });
 
 function activateResetMode() {
-    // mettre le bouton en mode RESET
+    // mettre le bouton en mode RESET = quand on joue
     resetMode = true;
     questionEl.disabled = true;
     submitEl.style.backgroundColor = "#F2880C" // change la couleur de fond en rouge
@@ -153,7 +202,7 @@ function activateResetMode() {
 }
 
 function desactivateResetMode() {
-    // Si le bouton est en mode "RESET", réinitialiser l'interface
+    // Si le bouton est en mode "RESET", réinitialiser l'interface = quand on recommence
     resetMode = false;
     questionEl.disabled = false;
     submitEl.textContent = 'Valider';
@@ -191,4 +240,23 @@ function stopProgressBar() {
 
 function generateSessionId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+
+function getRandomImage() {
+    const images = [
+        'https://cdn.discordapp.com/attachments/996306699017273345/1112700163601997955/Damien_imagination_colorful_story_white_background_9c5be37e-3498-4291-844f-5b4762b65088.png',
+        'https://cdn.discordapp.com/attachments/996306699017273345/1112700168412872735/Damien_imagination_colorful_story_white_background_6bb208c3-56c1-4247-ac4d-e1460a733e6b.png',
+        'https://cdn.discordapp.com/attachments/996306699017273345/1112700195319324682/Damien_imagination_colorful_story_white_background_4fc168cb-dafa-4493-8aec-0d824db0fcc3.png',
+        'https://cdn.discordapp.com/attachments/996306699017273345/1112700199387803758/Damien_imagination_colorful_story_white_background_aa55c5af-3fdc-493b-a554-b9a99bba314e.png'
+    ];
+
+    const randomIndex = Math.floor(Math.random() * images.length);
+    const selectedImage = images[randomIndex];
+
+    return `<img src="${selectedImage}" alt="Image représentant une histoire colorée" style="width: 100%;">`;
+}
+
+function interfaceInitiale() {
+    responseEl.innerHTML = ageGroupHTML + getRandomImage();
 }

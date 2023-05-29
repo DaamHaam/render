@@ -4,14 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat avec GPT-3</title>
+    <title>Fantas-IA</title>
     <link rel="stylesheet" href="styles.css">
     <!-- plein ecran android -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <!-- plein ecran ios -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <!-- pas encore d'icone -->
-    <!-- <link rel="apple-touch-icon" href="path/to/icon.png"> -->
     <!-- style de la barre de status -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="assets/super-heros.png">
@@ -22,24 +20,14 @@
 
     <div class="container">
 
-        <span class="version">v0.14</span> <!-- Ajout du numéro de version -->
+        <span class="version">v0.15</span> <!-- Ajout du numéro de version -->
 
         <input id="question" type="text" placeholder=" Quel est le héros ?">
         <button id="submit">Valider</button>
         <div id="progress-bar"></div>
 
-        <div id="response"></div>
-
-
-        <!-- anciens radio -->
-        <!-- <div class="choices">
-            <input type="radio" id="choiceA" name="choice" value="A">
-            <label for="choiceA">A</label>
-            <input type="radio" id="choiceB" name="choice" value="B">
-            <label for="choiceB">B</label>
-            <input type="radio" id="choiceC" name="choice" value="C">
-            <label for="choiceC">C</label>
-        </div> -->
+        <div id="response">
+        </div>
 
     </div>
     <script type="module" src="script.js"></script>
