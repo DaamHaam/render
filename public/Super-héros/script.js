@@ -177,7 +177,7 @@ questionEl.addEventListener('keyup', function (event) {
 function startProgressBar() {
     const progressBar = document.getElementById('progress-bar');
     progressBar.style.visibility = 'visible';
-    progressBar.style.transition = 'width 18s ease-in-out'; /* Remplit la barre en 15 secondes */
+    progressBar.style.transition = 'width 20s ease-in-out'; /* Remplit la barre en 15 secondes */
     progressBar.style.width = '100%';
 }
 
