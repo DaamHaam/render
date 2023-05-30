@@ -28,7 +28,10 @@ let phraseAgeValue = "";
 async function getCompletion(messageClient, ageValue, sessionID) {
     console.log("messageClient : " + messageClient);
     console.log("ageValue : " + ageValue);
-    console.log("sessionID : " + sessionID); let sessionData = sessions[sessionID];
+    console.log("sessionID : " + sessionID);
+
+    let sessionData = sessions[sessionID];
+
     if (!sessionData) {
         sessionData = {
             conversationHistory: [],
@@ -80,9 +83,11 @@ async function getCompletion(messageClient, ageValue, sessionID) {
 
     let contentForGPT;
 
+    // si c'est la première question
     if (sessionData.conversationHistory.length === 0) {
         contentForGPT = promptInitial;
     } else {
+        // si c'est une question suivante
         if (sessionData.choixPrecedents[`mauvaisChoix${messageClient}`]) {
             contentForGPT = texteDeFinPerdue;
         } else {
@@ -99,14 +104,18 @@ async function getCompletion(messageClient, ageValue, sessionID) {
 
     let errorParse = false;
 
+
+    // Appel de l'API
     const completion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: sessionData.conversationHistory
     });
 
+
     console.log("Réponse complète de l'API : ", completion.data);
     console.log("tentative parsing serveur de : " + completion.data.choices[0].message.content);
 
+    // Parsing de la réponse de l'assistant
     let reponseAssistant;
     try {
         reponseAssistant = JSON.parse(completion.data.choices[0].message.content);
@@ -115,10 +124,12 @@ async function getCompletion(messageClient, ageValue, sessionID) {
         errorParse = true;
         return;
     }
-
     console.log("reponseAssistant ", reponseAssistant);
     console.log("completion data : ", completion.data.choices[0].message.content);
 
+
+
+    // si le parsing est ok, stocker quels sont les bons ou mauvais choix
     if (errorParse == false) {
         sessionData.choixPrecedents = {
             mauvaisChoixA: reponseAssistant.mauvaisChoixA,
@@ -128,9 +139,12 @@ async function getCompletion(messageClient, ageValue, sessionID) {
 
         sessionData.indexQuestion += 1;
 
+        // rajoute la réponse de l'assistant dans l'historique
         sessionData.conversationHistory.push({ role: "assistant", content: completion.data.choices[0].message.content });
         return completion.data.choices[0].message.content;
     }
+
+    // si le parsing est en erreur
     else {
         return JSON.stringify({ "erreur": "JSON" });
     }
