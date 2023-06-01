@@ -39,6 +39,8 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             indexQuestion: 0,
             choixPrecedents: {},
             ageLocal: ageValue,
+            // pour cette session, c'est la partie 0
+            gameID: 0
             // ajouter ici d'autres variables de session si nécessaire
         };
         sessions[sessionID] = sessionData;
@@ -85,7 +87,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // étapes de la conversation
     if (sessionData.indexQuestion >= 1 && modifyState) {
         try {
-            const clientChoice = await getClientResponse(sessionID, messageClient);
+            const clientChoice = await getClientResponse(sessionID, messageClient, sessionData.gameID);
             console.log("Choix du client arrivé !!! :" + clientChoice);
 
             // rajoute la réponse de l'assistant dans l'historique
@@ -208,7 +210,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
     // seule la réponse utilisateur appelle cette fonction
     if (modifyState) {
-        generateNextResponses(sessionData, ageValue, sessionID);
+        generateNextResponses(sessionData, ageValue, sessionID, sessionData.gameID);
     }
 
     return currentResponse;
@@ -222,13 +224,16 @@ function resetConversation(sessionID) {
         sessionData.conversationHistory = [];
         sessionData.indexQuestion = 0;
         sessionData.choixPrecedents = {};
+        // Increment gameID each time the conversation is reset
+        sessionData.gameID++;
+        console.log("gameED : ", sessionData.gameID);
         console.log("conversation effacée");
     } else {
         console.log("Aucune session active avec l'ID donné");
     }
 }
 
-async function generateNextResponses(sessionData, ageValue, sessionID) {
+async function generateNextResponses(sessionData, ageValue, sessionID, gameID) {
     // sessionData.nextResponses = {};
 
     console.log("indexQuestion dans generateNext : ", sessionData.indexQuestion);
@@ -244,11 +249,14 @@ async function generateNextResponses(sessionData, ageValue, sessionID) {
 
         const nextResponses = await Promise.all(nextResponsesPromises);
 
-        sessionData.nextResponses = {
-            'A': nextResponses[0],
-            'B': nextResponses[1],
-            'C': nextResponses[2]
-        };
+        // Only update nextResponses if gameID hasn't changed
+        if (sessionData.gameID === gameID) {
+            sessionData.nextResponses = {
+                'A': nextResponses[0],
+                'B': nextResponses[1],
+                'C': nextResponses[2]
+            };
+        }
         console.log("sessionData.nextResponses : ", sessionData.nextResponses);
     }
 }
