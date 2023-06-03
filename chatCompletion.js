@@ -39,6 +39,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             indexQuestion: 0,
             choixPrecedents: {},
             ageLocal: ageValue,
+
             // ajouter ici d'autres variables de session si nécessaire
         };
         sessions[sessionID] = sessionData;
@@ -82,22 +83,57 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         .replace("{phraseAgeValue}", phraseAgeValue);
 
 
-    // étapes de la conversation
+    // étapes de la conversation, réponse du client
+
+
+    // est ce que la réponse user est poussée dans l'historique dans ce cas de chois étape ?
+
+
     if (sessionData.indexQuestion >= 1 && modifyState) {
         try {
             const clientChoice = await getClientResponse(sessionID, messageClient);
+
+
             console.log("Choix du client arrivé !!! :" + clientChoice);
 
+
+            let errorParse = false;
+            // Parsing de la réponse de l'assistant
+            let clientChoiceParsed;
+            try {
+                clientChoiceParsed = JSON.parse(clientChoice);
+            } catch (err) {
+                console.error("Erreur lors du parsage de la réponse de l'assistant:", err);
+                errorParse = true;
+                return;
+            }
+
+            // MAJ précédent choix pour réponses suivantes adaptées
+            console.log("clientChoice.mauvaisChoixA" + clientChoiceParsed.mauvaisChoixA);
+            console.log("clientChoice.mauvaisChoixB" + clientChoiceParsed.mauvaisChoixB);
+            console.log("clientChoice.mauvaisChoixC" + clientChoiceParsed.mauvaisChoixC);
+
+
+            // MAJ précédent choix pour réponses suivantes adaptées
+            sessionData.choixPrecedents = {
+                mauvaisChoixA: clientChoiceParsed.mauvaisChoixA,
+                mauvaisChoixB: clientChoiceParsed.mauvaisChoixB,
+                mauvaisChoixC: clientChoiceParsed.mauvaisChoixC
+            }
+
             // rajoute la réponse de l'assistant dans l'historique
-            sessionData.conversationHistory.push({ role: "user", content: texteEtape });
+            // sessionData.conversationHistory.push({ role: "user", content: texteEtape });
 
             // rajoute la réponse de l'assistant dans l'historique
             sessionData.conversationHistory.push({ role: "assistant", content: clientChoice });
 
 
+
             sessionData.indexQuestion += 1;
             console.log("indexQuestion passe à : ", sessionData.indexQuestion);
 
+
+            // lancer la génération des réponses suivantes hypothétiques
             generateNextResponses(sessionData, ageValue, sessionID);
 
             return clientChoice;
@@ -187,7 +223,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             console.log("indexQuestion passe à : ", sessionData.indexQuestion);
 
 
-            // rajoute la réponse de l'assistant dans l'historique
+            // rajoute la réponse de l'assistant dans l'historique uniquement si c'est une vraie réponse
             sessionData.conversationHistory.push({ role: "assistant", content: completion.data.choices[0].message.content });
 
         }
@@ -207,6 +243,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // fonction pour générer les réponses suivantes, en fonction de l'age, de l'historique de conversation et de l'index de la question
 
     // seule la réponse utilisateur appelle cette fonction
+    // en l'occurence la réponse utilisateur est le prompt initial sinon c'est retourné avant
     if (modifyState) {
         generateNextResponses(sessionData, ageValue, sessionID);
     }
@@ -244,11 +281,13 @@ async function generateNextResponses(sessionData, ageValue, sessionID) {
 
         const nextResponses = await Promise.all(nextResponsesPromises);
 
+
         sessionData.nextResponses = {
             'A': nextResponses[0],
             'B': nextResponses[1],
             'C': nextResponses[2]
         };
+
         console.log("sessionData.nextResponses : ", sessionData.nextResponses);
     }
 }
