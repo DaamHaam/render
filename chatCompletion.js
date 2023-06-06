@@ -1,9 +1,6 @@
 
-//A FAIRE ID DE PARTIE POUR TRAITER ANCIENNNES REponses en cas de reset
-// pas d'appel api si fin de partie gagne ou perdu (extraire choixprecedents et adapter)
 
-
-// commonJS à nouveau
+// commonJS imposé par serveur nodejs
 const { config } = require("dotenv");
 config();
 const configPrompt = require("./configPrompt.js");
@@ -25,34 +22,27 @@ let nombreDeQuestionsMax = configPrompt.nombreDeQuestionsMax;
 
 let phraseAgeValue = "";
 
-// modifyState = par défaut true = vraie réponse et pas hypothèse
+
+// modifyState = par défaut true = vraie réponse et pas génération anticipée
 async function getCompletion(messageClient, ageValue, sessionID, modifyState = true) {
     console.log("messageClient : " + messageClient);
     // console.log("ageValue : " + ageValue);
-    console.log("sessionID : " + sessionID);
+    // console.log("sessionID : " + sessionID);
 
+    // création d'une nouvelle session si besoin
     let sessionData = sessions[sessionID];
-
     if (!sessionData) {
-        sessionData = {
-            conversationHistory: [],
-            indexQuestion: 0,
-            choixPrecedents: {},
-            ageLocal: ageValue,
-            gameID: generateGameID(), // Ajout d'un gameID à chaque nouvelle session
-
-            // ajouter ici d'autres variables de session si nécessaire
-        };
-        sessions[sessionID] = sessionData;
+        sessionData = createNewSession(sessionID, ageValue);
     }
 
-    let currentGameID = sessionData.gameID; // Stocker le gameID actuel pour vérification ultérieure
+    // Stocker le gameID actuel pour vérification ultérieure
+    let currentGameID = sessionData.gameID;
 
-    // aleatoire mauvais choix
+    //  Emplacement aléatoire du mauvais choix
     let letters = ['A', 'B', 'C'];
     let badChoiceIndex = letters[Math.floor(Math.random() * letters.length)];
 
-    // verifie qu'un age est défini
+    // verifie qu'un age est défini et phrase supplémentaire à ajouter
     if (!sessionData.ageLocal || sessionData.ageLocal === "0") {
         phraseAgeValue = "";
     }
@@ -60,7 +50,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         phraseAgeValue = "L'histoire et le vocabulaire doivent être vraiment ciblés pour cette tranche d'âge : " + sessionData.ageLocal + " ans.";
     }
 
-
+    // adaptation des prompts
     let promptInitial = configPrompt.promptInitialTemplate
         .replace("{nombreDeChoix}", nombreDeChoix)
         .replace("{badChoiceIndex}", badChoiceIndex)
@@ -86,17 +76,14 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         .replace("{phraseAgeValue}", phraseAgeValue);
 
 
-    // est ce que la réponse user est poussée dans l'historique dans ce cas de chois étape ?
+    // est ce que la réponse user est poussée dans l'historique dans ce cas de choix étape ?
 
-    // étapes de la conversation, réponse du client
+    // étapes de la conversation, réponse du client sur les choix anticipés
     if (sessionData.indexQuestion >= 1 && modifyState) {
         try {
-            let perdu = false;
             const clientChoice = await getClientResponse(sessionID, messageClient);
 
-
-            console.log("Choix du client arrivé !!! :" + clientChoice);
-
+            console.log("Choix du client arrivé : " + clientChoice);
 
             let errorParse = false;
             // Parsing de la réponse de l'assistant
@@ -108,16 +95,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
                 errorParse = true;
                 return;
             }
-
-            // MAJ précédent choix pour réponses suivantes adaptées
-            // console.log("clientChoice.mauvaisChoixA" + clientChoiceParsed.mauvaisChoixA);
-            // console.log("clientChoice.mauvaisChoixB" + clientChoiceParsed.mauvaisChoixB);
-            // console.log("clientChoice.mauvaisChoixC" + clientChoiceParsed.mauvaisChoixC);
-
-
-            // console.log("clientChoice.choixA  " + clientChoiceParsed.choixA);
-            // console.log("clientChoice.choixB  " + clientChoiceParsed.choixB);
-            // console.log("clientChoice.choixC  " + clientChoiceParsed.choixC);
 
             // si pas fin de partie (gagné ou perdu)
             // stocker les choix précédents pour les réponses suivantes, générer suite,etc...
@@ -133,7 +110,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
                 // rajoute la réponse de l'assistant dans l'historique
                 // sessionData.conversationHistory.push({ role: "user", content: texteEtape });
-
+                // console.log("texteEtape : " + texteEtape);
                 // rajoute la réponse de l'assistant dans l'historique
                 sessionData.conversationHistory.push({ role: "assistant", content: clientChoice });
 
@@ -147,12 +124,9 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
                 // 
                 generateNextResponses(sessionData, ageValue, sessionID);
 
-
-
             }
 
-
-
+            console.log("historique étape : " + JSON.stringify(sessionData.conversationHistory));
 
             return clientChoice;
 
@@ -162,13 +136,14 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     }
 
 
+    // si c'est la première question et anticipation de la réponse
     let contentForGPT;
 
     // si c'est la première question
     if (sessionData.conversationHistory.length === 0) {
         contentForGPT = promptInitial;
     } else {
-        // si c'est une question suivante
+        // si c'est une question suivante par anticipation
         if (sessionData.choixPrecedents[`mauvaisChoix${messageClient}`]) {
             contentForGPT = texteDeFinPerdue;
         } else {
@@ -183,7 +158,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // console.log("contentForGPT : " + contentForGPT);
 
 
-
     // Copier l'historique de la conversation
     let tempConversationHistory = [...sessionData.conversationHistory];
 
@@ -196,29 +170,17 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     }
 
 
-
     // Appel de l'API avec l'historique temporaire
     const completion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: tempConversationHistory
     });
 
-
-
-
     // Vérifier si le gameID actuel correspond à celui de l'API
     if (currentGameID !== sessionData.gameID) {
         // Le jeu a été réinitialisé entre-temps, donc ignorer cette réponse
         return JSON.stringify({ "error": "gameID_mismatch", "message": "Le jeu a été réinitialisé entre-temps, donc cette réponse a été ignorée." });
     }
-
-
-
-
-
-    // console.log("Réponse complète de l'API : ", completion.data);
-    // console.log("tentative parsing serveur de : " + completion.data.choices[0].message.content);
-
 
     let errorParse = false;
     // Parsing de la réponse de l'assistant
@@ -263,19 +225,19 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
     // si le parsing est en erreur
     else {
-        return JSON.stringify({ "erreur": "JSON" });
+        return JSON.stringify({ "erreur": "JSON", "message": "Erreur parsing coté serveur" });
     }
 
     // Générer les réponses pour les choix suivants si c'est la première question : une demande user et une reponse assistant soit 2 éléments dans l'historique
-    console.log("Longueur de l'historique de conversation : ", sessionData.conversationHistory.length);
 
+    // console.log("Longueur de l'historique de conversation : ", sessionData.conversationHistory.length);
     // fonction pour générer les réponses suivantes, en fonction de l'age, de l'historique de conversation et de l'index de la question
-
     // seule la réponse utilisateur appelle cette fonction
     // en l'occurence la réponse utilisateur est le prompt initial sinon c'est retourné avant
 
     // si gagné, indexQuestion a atteint le nombre de questions max et on ne génère plus de réponses 
     if (modifyState && sessionData.indexQuestion < nombreDeQuestionsMax + 1) {
+        console.log("generating");
         generateNextResponses(sessionData, ageValue, sessionID);
     }
 
@@ -300,7 +262,7 @@ function resetConversation(sessionID) {
 async function generateNextResponses(sessionData, ageValue, sessionID) {
     // sessionData.nextResponses = {};
 
-    console.log("indexQuestion dans generateNext : ", sessionData.indexQuestion);
+    // console.log("indexQuestion dans generateNext : ", sessionData.indexQuestion);
 
     if (sessionData.indexQuestion < nombreDeQuestionsMax + 1) {
 
@@ -309,7 +271,7 @@ async function generateNextResponses(sessionData, ageValue, sessionID) {
             return nextResponsePromise;
         });
 
-        console.log("Longueur de l'historique de conversation une fois remis  après encore : ", sessionData.conversationHistory.length);
+        // console.log("Longueur de l'historique de conversation une fois remis  après encore : ", sessionData.conversationHistory.length);
 
         const nextResponses = await Promise.all(nextResponsesPromises);
 
@@ -343,6 +305,9 @@ async function getClientResponse(sessionID, clientChoice) {
     // À ce stade, les réponses anticipées devraient être prêtes
     let response = sessionData.nextResponses[clientChoice];
 
+    let userResponse = ("Mon choix est " + clientChoice + ".")
+    sessionData.conversationHistory.push({ role: "user", content: userResponse });
+
     // Supprimer les réponses anticipées pour le prochain tour
     delete sessionData.nextResponses;
 
@@ -353,5 +318,20 @@ async function getClientResponse(sessionID, clientChoice) {
 function generateGameID() {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
+
+function createNewSession(sessionID, ageValue) {
+    let sessionData = {
+        conversationHistory: [],
+        indexQuestion: 0,
+        choixPrecedents: {},
+        ageLocal: ageValue,
+        gameID: generateGameID(),
+    };
+    sessions[sessionID] = sessionData;
+    return sessionData;
+}
+
+
+
 
 module.exports = { getCompletion, resetConversation };
