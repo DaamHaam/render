@@ -28,7 +28,7 @@ let phraseAgeValue = "";
 // modifyState = par défaut true = vraie réponse et pas hypothèse
 async function getCompletion(messageClient, ageValue, sessionID, modifyState = true) {
     console.log("messageClient : " + messageClient);
-    console.log("ageValue : " + ageValue);
+    // console.log("ageValue : " + ageValue);
     console.log("sessionID : " + sessionID);
 
     let sessionData = sessions[sessionID];
@@ -83,14 +83,12 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         .replace("{phraseAgeValue}", phraseAgeValue);
 
 
-    // étapes de la conversation, réponse du client
-
-
     // est ce que la réponse user est poussée dans l'historique dans ce cas de chois étape ?
 
-
+    // étapes de la conversation, réponse du client
     if (sessionData.indexQuestion >= 1 && modifyState) {
         try {
+            let perdu = false;
             const clientChoice = await getClientResponse(sessionID, messageClient);
 
 
@@ -109,32 +107,49 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             }
 
             // MAJ précédent choix pour réponses suivantes adaptées
-            console.log("clientChoice.mauvaisChoixA" + clientChoiceParsed.mauvaisChoixA);
-            console.log("clientChoice.mauvaisChoixB" + clientChoiceParsed.mauvaisChoixB);
-            console.log("clientChoice.mauvaisChoixC" + clientChoiceParsed.mauvaisChoixC);
+            // console.log("clientChoice.mauvaisChoixA" + clientChoiceParsed.mauvaisChoixA);
+            // console.log("clientChoice.mauvaisChoixB" + clientChoiceParsed.mauvaisChoixB);
+            // console.log("clientChoice.mauvaisChoixC" + clientChoiceParsed.mauvaisChoixC);
 
 
-            // MAJ précédent choix pour réponses suivantes adaptées
-            sessionData.choixPrecedents = {
-                mauvaisChoixA: clientChoiceParsed.mauvaisChoixA,
-                mauvaisChoixB: clientChoiceParsed.mauvaisChoixB,
-                mauvaisChoixC: clientChoiceParsed.mauvaisChoixC
+            // console.log("clientChoice.choixA  " + clientChoiceParsed.choixA);
+            // console.log("clientChoice.choixB  " + clientChoiceParsed.choixB);
+            // console.log("clientChoice.choixC  " + clientChoiceParsed.choixC);
+
+            // si pas fin de partie (gagné ou perdu)
+            // stocker les choix précédents pour les réponses suivantes, générer suite,etc...
+            if (sessionData.indexQuestion < nombreDeQuestionsMax && !(clientChoiceParsed.choixA === "0" && clientChoiceParsed.choixB === "0" && clientChoiceParsed.choixC === "0")) {
+
+
+                // MAJ précédent choix pour réponses suivantes adaptées
+                sessionData.choixPrecedents = {
+                    mauvaisChoixA: clientChoiceParsed.mauvaisChoixA,
+                    mauvaisChoixB: clientChoiceParsed.mauvaisChoixB,
+                    mauvaisChoixC: clientChoiceParsed.mauvaisChoixC
+                }
+
+                // rajoute la réponse de l'assistant dans l'historique
+                // sessionData.conversationHistory.push({ role: "user", content: texteEtape });
+
+                // rajoute la réponse de l'assistant dans l'historique
+                sessionData.conversationHistory.push({ role: "assistant", content: clientChoice });
+
+
+
+                sessionData.indexQuestion += 1;
+                console.log("indexQuestion passe à : ", sessionData.indexQuestion);
+
+
+                // lancer la génération des réponses suivantes hypothétiques
+                // 
+                generateNextResponses(sessionData, ageValue, sessionID);
+
+
+
             }
 
-            // rajoute la réponse de l'assistant dans l'historique
-            // sessionData.conversationHistory.push({ role: "user", content: texteEtape });
-
-            // rajoute la réponse de l'assistant dans l'historique
-            sessionData.conversationHistory.push({ role: "assistant", content: clientChoice });
 
 
-
-            sessionData.indexQuestion += 1;
-            console.log("indexQuestion passe à : ", sessionData.indexQuestion);
-
-
-            // lancer la génération des réponses suivantes hypothétiques
-            generateNextResponses(sessionData, ageValue, sessionID);
 
             return clientChoice;
 
@@ -244,7 +259,9 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
     // seule la réponse utilisateur appelle cette fonction
     // en l'occurence la réponse utilisateur est le prompt initial sinon c'est retourné avant
-    if (modifyState) {
+
+    // si gagné, indexQuestion a atteint le nombre de questions max et on ne génère plus de réponses 
+    if (modifyState && sessionData.indexQuestion < nombreDeQuestionsMax + 1) {
         generateNextResponses(sessionData, ageValue, sessionID);
     }
 

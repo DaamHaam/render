@@ -36,7 +36,7 @@ let ageGroupHTML = `
 </div>
 `;
 
-const waitMessage = "Pour l'instant, il faut attendre un peu 😊" + "<br>";
+const waitMessage = "Pour l'instant, il faut attendre un peu 😊 " + "<br>";
 const appName = "Fantas-IA";
 
 let indexQuestion = 0;
@@ -89,6 +89,9 @@ async function sendRequest(content, ageValue) {
         if (jsonData.histoire) {
             formattedMessage += jsonData.histoire;
         }
+
+
+        // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 1 = pas en cas de victoire 
         if (jsonData.choixA && jsonData.choixA !== "0") {
             formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
         }
@@ -98,10 +101,13 @@ async function sendRequest(content, ageValue) {
         if (jsonData.choixC && jsonData.choixC !== "0") {
             formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
         }
+
     }
 
+    formattedMessage += "<br>";
+
     // rajoute une image
-    formattedMessage += getRandomImage();
+    formattedMessage += getSpecificOrRandomImage(jsonData.choixA, jsonData.choixB, jsonData.choixC);
 
     // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
     responseEl.innerHTML = formattedMessage;
@@ -255,6 +261,18 @@ function getRandomImage() {
     const selectedImage = images[randomIndex];
 
     return `<img src="${selectedImage}" alt="Image représentant une histoire colorée" style="width: 100%;">`;
+}
+
+function getSpecificOrRandomImage(choixA, choixB, choixC) {
+    // quand gagné, renvoyer une image spécifique
+    // ne marche pas, à revoir, changer le json
+    // if (choixA === "1" && choixB === "1" && choixC === "1") {
+    //     // si toutes les valeurs sont égales à 1, renvoyez votre image spécifique
+    //     return `<img src="assets/Massage.jpg" alt="Image spécifique" style="width: 100%;">`;
+    // } else {
+    // sinon, renvoyez une image aléatoire comme auparavant
+    return getRandomImage();
+    // }
 }
 
 function interfaceInitiale() {
