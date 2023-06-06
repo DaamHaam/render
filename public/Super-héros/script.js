@@ -67,10 +67,6 @@ async function sendRequest(content, ageValue) {
     });
     const data = await response.json();
 
-    // REPONSE
-
-    stopProgressBar();
-    // console.log(data.message);
 
     console.log("Tentative de parsing de JSON sur script.js : ", data.message);
 
@@ -79,60 +75,75 @@ async function sendRequest(content, ageValue) {
 
     const jsonData = JSON.parse(data.message);
 
-    let formattedMessage = "";
 
-    if (jsonData.erreur) {
-        formattedMessage += "ERREUR serveur - cliquer Recommencer";
+    // si erreur l'afficher dans la console 
+    if (jsonData.error) {
+        // Une erreur s'est produite, donc ignorer cette réponse
+        console.error("ERREUR" + data.message); // Afficher le message d'erreur dans la console
+        return;
     }
     else {
-        // verifie que les cles sont presentes avant
-        if (jsonData.histoire) {
-            formattedMessage += jsonData.histoire;
+
+
+        stopProgressBar();
+        // console.log(data.message);
+
+
+        let formattedMessage = "";
+
+        if (jsonData.erreur) {
+            formattedMessage += "ERREUR serveur - cliquer Recommencer";
         }
-
-
-        // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 1 = pas en cas de victoire 
-        if (jsonData.choixA && jsonData.choixA !== "0") {
-            formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
-        }
-        if (jsonData.choixB && jsonData.choixB !== "0") {
-            formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
-        }
-        if (jsonData.choixC && jsonData.choixC !== "0") {
-            formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
-        }
-
-    }
-
-    formattedMessage += "<br>";
-
-    // rajoute une image
-    formattedMessage += getSpecificOrRandomImage(jsonData.choixA, jsonData.choixB, jsonData.choixC);
-
-    // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
-    responseEl.innerHTML = formattedMessage;
-
-    // Ajouter un écouteur d'événements click à chaque choix
-    const choices = document.getElementsByClassName('choiceN');
-    for (let i = 0; i < choices.length; i++) {
-        choices[i].addEventListener('click', () => {
-            // Envoie la dernière lettre de l'id (A, B ou C) à sendRequest
-            sendRequest(choices[i].id.slice(-1));
-
-            // Supprime la classe "selected" de tous les choix
-            for (let j = 0; j < choices.length; j++) {
-                choices[j].classList.remove('selected');
+        else {
+            // verifie que les cles sont presentes avant
+            if (jsonData.histoire) {
+                formattedMessage += jsonData.histoire;
             }
 
-            // Ajoute la classe "selected" au choix cliqué
-            choices[i].classList.add('selected');
 
-            // Désactive tous les choix
-            for (let j = 0; j < choices.length; j++) {
-                choices[j].style.pointerEvents = 'none';
+            // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 1 = pas en cas de victoire 
+            if (jsonData.choixA && jsonData.choixA !== "0") {
+                formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
+            }
+            if (jsonData.choixB && jsonData.choixB !== "0") {
+                formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
+            }
+            if (jsonData.choixC && jsonData.choixC !== "0") {
+                formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
             }
 
-        });
+        }
+
+        formattedMessage += "<br>";
+
+        // rajoute une image
+        formattedMessage += getSpecificOrRandomImage(jsonData.choixA, jsonData.choixB, jsonData.choixC);
+
+        // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
+        responseEl.innerHTML = formattedMessage;
+
+        // Ajouter un écouteur d'événements click à chaque choix
+        const choices = document.getElementsByClassName('choiceN');
+        for (let i = 0; i < choices.length; i++) {
+            choices[i].addEventListener('click', () => {
+                // Envoie la dernière lettre de l'id (A, B ou C) à sendRequest
+                sendRequest(choices[i].id.slice(-1));
+
+                // Supprime la classe "selected" de tous les choix
+                for (let j = 0; j < choices.length; j++) {
+                    choices[j].classList.remove('selected');
+                }
+
+                // Ajoute la classe "selected" au choix cliqué
+                choices[i].classList.add('selected');
+
+                // Désactive tous les choix
+                for (let j = 0; j < choices.length; j++) {
+                    choices[j].style.pointerEvents = 'none';
+                }
+
+            });
+        }
     }
 }
 

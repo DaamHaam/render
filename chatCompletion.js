@@ -39,11 +39,14 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             indexQuestion: 0,
             choixPrecedents: {},
             ageLocal: ageValue,
+            gameID: generateGameID(), // Ajout d'un gameID à chaque nouvelle session
 
             // ajouter ici d'autres variables de session si nécessaire
         };
         sessions[sessionID] = sessionData;
     }
+
+    let currentGameID = sessionData.gameID; // Stocker le gameID actuel pour vérification ultérieure
 
     // aleatoire mauvais choix
     let letters = ['A', 'B', 'C'];
@@ -202,6 +205,17 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
 
 
+
+    // Vérifier si le gameID actuel correspond à celui de l'API
+    if (currentGameID !== sessionData.gameID) {
+        // Le jeu a été réinitialisé entre-temps, donc ignorer cette réponse
+        return JSON.stringify({ "error": "gameID_mismatch", "message": "Le jeu a été réinitialisé entre-temps, donc cette réponse a été ignorée." });
+    }
+
+
+
+
+
     // console.log("Réponse complète de l'API : ", completion.data);
     // console.log("tentative parsing serveur de : " + completion.data.choices[0].message.content);
 
@@ -276,6 +290,7 @@ function resetConversation(sessionID) {
         sessionData.conversationHistory = [];
         sessionData.indexQuestion = 0;
         sessionData.choixPrecedents = {};
+        sessionData.gameID = generateGameID(); // Générer un nouveau gameID lors de la réinitialisation
         console.log("conversation effacée");
     } else {
         console.log("Aucune session active avec l'ID donné");
@@ -334,5 +349,9 @@ async function getClientResponse(sessionID, clientChoice) {
     return response;
 }
 
+// Generate a unique game ID
+function generateGameID() {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
 
 module.exports = { getCompletion, resetConversation };
