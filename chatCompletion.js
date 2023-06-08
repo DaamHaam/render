@@ -38,7 +38,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // Stocker le gameID actuel pour vérification ultérieure
     let currentGameID = sessionData.gameID;
 
-    //  Emplacement aléatoire du mauvais choix
+    //  Emplacement aléatoire du note choix
     let letters = ['A', 'B', 'C'];
     let badChoiceIndex = letters[Math.floor(Math.random() * letters.length)];
 
@@ -103,9 +103,9 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
                 // MAJ précédent choix pour réponses suivantes adaptées
                 sessionData.choixPrecedents = {
-                    mauvaisChoixA: clientChoiceParsed.mauvaisChoixA,
-                    mauvaisChoixB: clientChoiceParsed.mauvaisChoixB,
-                    mauvaisChoixC: clientChoiceParsed.mauvaisChoixC
+                    noteChoixA: clientChoiceParsed.noteChoixA,
+                    noteChoixB: clientChoiceParsed.noteChoixB,
+                    noteChoixC: clientChoiceParsed.noteChoixC
                 }
 
                 // rajoute la réponse de l'assistant dans l'historique
@@ -144,7 +144,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         contentForGPT = promptInitial;
     } else {
         // si c'est une question suivante par anticipation
-        if (sessionData.choixPrecedents[`mauvaisChoix${messageClient}`]) {
+        if (sessionData.choixPrecedents[`noteChoix${messageClient}`]) {
             contentForGPT = texteDeFinPerdue;
         } else {
             console.log(sessionData.indexQuestion + " questions vs max : " + nombreDeQuestionsMax)
@@ -198,15 +198,15 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
     let currentResponse;
 
-    // si le parsing est ok, stocker quels sont les bons ou mauvais choix
+    // si le parsing est ok, stocker quels sont les bons ou note choix
     if (errorParse == false) {
 
         // modifer index question choixprecedents et conversation history que si vraie réponse et pas hypothèse
         if (modifyState) {
             sessionData.choixPrecedents = {
-                mauvaisChoixA: reponseAssistant.mauvaisChoixA,
-                mauvaisChoixB: reponseAssistant.mauvaisChoixB,
-                mauvaisChoixC: reponseAssistant.mauvaisChoixC
+                noteChoixA: reponseAssistant.noteChoixA,
+                noteChoixB: reponseAssistant.noteChoixB,
+                noteChoixC: reponseAssistant.noteChoixC
             };
 
             // incr 1 index question mais aussi plus haut pour etapes
