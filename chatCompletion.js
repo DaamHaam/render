@@ -144,7 +144,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         contentForGPT = promptInitial;
     } else {
         // si c'est une question suivante par anticipation
-        if (sessionData.choixPrecedents[`noteChoix${messageClient}`]) {
+        if (sessionData.choixPrecedents[`noteChoix${messageClient}`] === 0) {
             contentForGPT = texteDeFinPerdue;
         } else {
             console.log(sessionData.indexQuestion + " questions vs max : " + nombreDeQuestionsMax)
