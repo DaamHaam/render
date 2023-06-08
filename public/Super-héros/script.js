@@ -11,33 +11,28 @@ let ageGroupHTML = `
 
     <br> <!-- Saut de ligne -->
 
-    <input type="radio" id="age1" name="age" value="4 à 6" class="radioAge">
-    <label for="age1" class="radioLabel">4 à 6 ans</label>
+    <input type="radio" id="age1" name="age" value="4 à 7" class="radioAge">
+    <label for="age1" class="radioLabel">4 à 7 ans</label>
 
     <br><br> <!-- Sauts de ligne supplémentaires -->
 
-    <input type="radio" id="age2" name="age" value="6 à 8" class="radioAge">
-    <label for="age2" class="radioLabel">6 à 8 ans</label>
+    <input type="radio" id="age2" name="age" value="8 à 12" class="radioAge">
+    <label for="age2" class="radioLabel">8 à 12 ans</label>
 
     <br><br> <!-- Sauts de ligne supplémentaires -->
 
-    <input type="radio" id="age3" name="age" value="8 à 12" class="radioAge">
-    <label for="age3" class="radioLabel">8 à 12 ans</label>
+    <input type="radio" id="age3" name="age" value="13 à 16" class="radioAge">
+    <label for="age3" class="radioLabel">13 à 16 ans</label>
 
     <br><br> <!-- Sauts de ligne supplémentaires -->
 
-    <input type="radio" id="age4" name="age" value="12 à 16" class="radioAge">
-    <label for="age4" class="radioLabel">12 à 16 ans</label>
-
-    <br><br> <!-- Sauts de ligne supplémentaires -->
-
-    <input type="radio" id="age5" name="age" value="contenu adulte, plus de 16" class="radioAge">
-    <label for="age5" class="radioLabel">+ de 16 ans</label>
+    <input type="radio" id="age4" name="age" value="contenu adulte, plus de 16" class="radioAge">
+    <label for="age4" class="radioLabel">+ de 16 ans</label>
 </div>
 `;
 
 const waitMessage = "Pour l'instant, il faut attendre un peu 😊 " + "<br>";
-const appName = "Fantas-IA";
+const appName = "";
 
 let indexQuestion = 0;
 
@@ -262,10 +257,13 @@ function generateSessionId() {
 
 function getRandomImage() {
     const images = [
-        'https://cdn.discordapp.com/attachments/996306699017273345/1112700163601997955/Damien_imagination_colorful_story_white_background_9c5be37e-3498-4291-844f-5b4762b65088.png',
-        'https://cdn.discordapp.com/attachments/996306699017273345/1112700168412872735/Damien_imagination_colorful_story_white_background_6bb208c3-56c1-4247-ac4d-e1460a733e6b.png',
-        'https://cdn.discordapp.com/attachments/996306699017273345/1112700195319324682/Damien_imagination_colorful_story_white_background_4fc168cb-dafa-4493-8aec-0d824db0fcc3.png',
-        'https://cdn.discordapp.com/attachments/996306699017273345/1112700199387803758/Damien_imagination_colorful_story_white_background_aa55c5af-3fdc-493b-a554-b9a99bba314e.png'
+
+        'https://cdn.discordapp.com/attachments/996306699017273345/1116093709721809027/Damien_imagination_story_speed_books_colorful_white_background_e2476ae7-069b-43db-8c52-802b14ba6451.png',
+        'https://cdn.discordapp.com/attachments/996306699017273345/1116095304400379954/Damien_imagination_story_speed_hero_colorful_white_background_8e8f5f6e-5848-40dc-9994-35028ae20575.png',
+        'https://cdn.discordapp.com/attachments/996306699017273345/1116095289456082964/Damien_imagination_story_speed_hero_colorful_white_background_2214cda4-58b1-4496-b56f-29096198943e.png',
+        'https://cdn.discordapp.com/attachments/996306699017273345/1116095276768317530/Damien_imagination_story_speed_hero_colorful_white_background_ee02c7ea-2d0f-4af7-af0f-f8ebb7268e86.png',
+        'https://cdn.discordapp.com/attachments/996306699017273345/1116093726880714752/Damien_imagination_story_speed_books_colorful_white_background_defcce7c-4837-456b-a6d6-bca791915728.png'
+
     ];
 
     const randomIndex = Math.floor(Math.random() * images.length);
@@ -289,3 +287,11 @@ function getSpecificOrRandomImage(choixA, choixB, choixC) {
 function interfaceInitiale() {
     responseEl.innerHTML = ageGroupHTML + getRandomImage();
 }
+
+
+
+// stock images : 
+// 'https://cdn.discordapp.com/attachments/996306699017273345/1112700163601997955/Damien_imagination_colorful_story_white_background_9c5be37e-3498-4291-844f-5b4762b65088.png',
+// 'https://cdn.discordapp.com/attachments/996306699017273345/1112700168412872735/Damien_imagination_colorful_story_white_background_6bb208c3-56c1-4247-ac4d-e1460a733e6b.png',
+// 'https://cdn.discordapp.com/attachments/996306699017273345/1112700195319324682/Damien_imagination_colorful_story_white_background_4fc168cb-dafa-4493-8aec-0d824db0fcc3.png',
+// 'https://cdn.discordapp.com/attachments/996306699017273345/1112700199387803758/Damien_imagination_colorful_story_white_background_aa55c5af-3fdc-493b-a554-b9a99bba314e.png',
