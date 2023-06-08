@@ -96,14 +96,14 @@ async function sendRequest(content, ageValue) {
             }
 
 
-            // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 1 = pas en cas de victoire 
-            if (jsonData.choixA && jsonData.choixA !== "0") {
+            // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 2 = pas en cas de victoire 
+            if (jsonData.choixA && jsonData.choixA !== "0" && jsonData.choixA !== "2") {
                 formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
             }
-            if (jsonData.choixB && jsonData.choixB !== "0") {
+            if (jsonData.choixB && jsonData.choixB !== "0" && jsonData.choixB !== "2") {
                 formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
             }
-            if (jsonData.choixC && jsonData.choixC !== "0") {
+            if (jsonData.choixC && jsonData.choixC !== "0" && jsonData.choixB !== "2") {
                 formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
             }
 
