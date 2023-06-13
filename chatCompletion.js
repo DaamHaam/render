@@ -101,7 +101,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         .replace("{phraseAgeValue}", phraseAgeValue);
 
     if (isPersonalizedAnswer) {
-        console.log("texteGagne isP : " + texteDeFinGagne);
+        // console.log("texteGagne isP : " + texteDeFinGagne);
     }
     let texteDeFinPerdue = configPrompt.texteDeFinPerdueTemplate
         .replace("{messageClient}", messageClient)
@@ -158,7 +158,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
             }
 
-            console.log("historique étape : " + JSON.stringify(sessionData.conversationHistory));
+            // console.log("historique étape : " + JSON.stringify(sessionData.conversationHistory));
 
             return clientChoice;
 
@@ -209,7 +209,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // Si modifyState est vrai, mettre à jour l'historique réel de la session
     if (modifyState) {
         sessionData.conversationHistory = tempConversationHistory;
-        console.log("historique mis a jour avec isP : " + JSON.stringify(sessionData.conversationHistory));
+        // console.log("historique mis a jour avec isP : " + JSON.stringify(sessionData.conversationHistory));
     }
 
 
@@ -224,6 +224,8 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         // Le jeu a été réinitialisé entre-temps, donc ignorer cette réponse
         return JSON.stringify({ "error": "gameID_mismatch", "message": "Le jeu a été réinitialisé entre-temps, donc cette réponse a été ignorée." });
     }
+
+
 
     let errorParse = false;
     // Parsing de la réponse de l'assistant
@@ -241,7 +243,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
     let currentResponse;
 
-    // si le parsing est ok, stocker quels sont les bons ou note choix
+    // si le parsing est ok, stocker quels sont les bons ou mauvais choix
     if (errorParse == false) {
 
         // modifer index question choixprecedents et conversation history que si vraie réponse et pas hypothèse
@@ -259,7 +261,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
             // rajoute la réponse de l'assistant dans l'historique uniquement si c'est une vraie réponse
             sessionData.conversationHistory.push({ role: "assistant", content: completion.data.choices[0].message.content });
-
+            console.log("historique mis a jour avec isP BIS : " + JSON.stringify(sessionData.conversationHistory));
         }
 
         // stocke la réponse première de l'assistant dans une variable
@@ -279,7 +281,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // en l'occurence la réponse utilisateur est le prompt initial sinon c'est retourné avant
 
     // si gagné, indexQuestion a atteint le nombre de questions max et on ne génère plus de réponses 
-    if (modifyState && sessionData.indexQuestion < nombreDeQuestionsMax + 1 && !isPersonalizedAnswer) {
+    if (modifyState && (sessionData.indexQuestion < nombreDeQuestionsMax + 1) && !isPersonalizedAnswer) {
         console.log("generating");
         generateNextResponses(sessionData, ageValue, sessionID);
     }
@@ -331,6 +333,8 @@ async function generateNextResponses(sessionData, ageValue, sessionID) {
 
 async function getClientResponse(sessionID, clientChoice) {
     let sessionData = sessions[sessionID];
+
+    console.log("getClientResponse : ", clientChoice);
 
     // Vérifier si les réponses anticipées sont prêtes
     if (!sessionData.nextResponses) {

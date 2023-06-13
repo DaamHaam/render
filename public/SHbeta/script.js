@@ -50,7 +50,11 @@ async function sendRequest(content, ageValue) {
 
     // si première question
     if (indexQuestion === 0) {
-        responseEl.innerHTML = 'Génération en cours 🤞...' + '<br><br>' + '<b>' + appName + '</b>' + '<br><br>' + getRandomLoadingMessage() + '<br><br><br>' + waitMessage + getRandomImage()
+        responseEl.innerHTML = 'Génération en cours 🤞...' + '<br><br>' + '<b>' + appName + '</b>'
+            // + '<br><br>'
+            // + getRandomLoadingMessage() 
+            // + '<br><br><br>' 
+            + waitMessage + getRandomImage()
     }
     indexQuestion += 1;
 
@@ -106,6 +110,7 @@ async function sendRequest(content, ageValue) {
                     formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
                     formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
                     formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "<b></div><br>";
+                    // si la question est la xx, ajouter un bouton pour la réponse personnalisée
                     if (indexQuestion === 3) {
                         persoButton = true;
                         formattedMessage += "<div id='customChoice' class='choiceP customChoiceStyle'><input type='text' id='customResponse' class='customResponseStyle'/><button id='customSubmit' class='choiceN customSubmitStyle'><i class='fas fa-paper-plane'></i></button></div><br>";
@@ -121,6 +126,7 @@ async function sendRequest(content, ageValue) {
 
         // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
         responseEl.innerHTML = formattedMessage;
+        responseEl.scrollTop = 0;
 
         if (persoButton) {
             // Ajouter l'écouteur d'événement ici, après que le bouton soit créé
