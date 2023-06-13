@@ -85,6 +85,7 @@ async function sendRequest(content, ageValue) {
 
 
         let formattedMessage = "";
+        let persoButton = false;
 
         if (jsonData.erreur) {
             formattedMessage += "ERREUR serveur - cliquer Recommencer";
@@ -94,6 +95,7 @@ async function sendRequest(content, ageValue) {
             if (jsonData.histoire) {
                 formattedMessage += jsonData.histoire;
             }
+
 
             // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 2 = pas en cas de victoire 
             // et pas en cas de défaite
@@ -105,8 +107,10 @@ async function sendRequest(content, ageValue) {
                     formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
                     formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
                     formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "<b></div><br>";
-                    formattedMessage += "<br><div id='customChoice' class='choiceP customChoiceStyle'><input type='text' id='customResponse' class='customResponseStyle'/><button id='customSubmit' class='choiceN customSubmitStyle'>Valider</button></div><br>";
-
+                    if (indexQuestion === 3) {
+                        persoButton = true;
+                        formattedMessage += "<br><div id='customChoice' class='choiceP customChoiceStyle'><input type='text' id='customResponse' class='customResponseStyle'/><button id='customSubmit' class='choiceN customSubmitStyle'>Valider</button></div><br>";
+                    }
                 }
             }
         }
@@ -118,22 +122,23 @@ async function sendRequest(content, ageValue) {
         // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
         responseEl.innerHTML = formattedMessage;
 
-        // Ajouter l'écouteur d'événement ici, après que le bouton soit créé
-        document.getElementById('customSubmit').addEventListener('click', () => {
-            const customResponse = document.getElementById('customResponse').value;
-            sendRequest("D - " + customResponse);
+        if (persoButton) {
+            // Ajouter l'écouteur d'événement ici, après que le bouton soit créé
+            document.getElementById('customSubmit').addEventListener('click', () => {
+                const customResponse = document.getElementById('customResponse').value;
+                sendRequest("D - " + customResponse);
 
-            // Supprime la classe "selected" de tous les choix
-            for (let j = 0; j < choices.length; j++) {
-                choices[j].classList.remove('selected');
-            }
+                // Supprime la classe "selected" de tous les choix
+                for (let j = 0; j < choices.length; j++) {
+                    choices[j].classList.remove('selected');
+                }
 
-            // Désactive tous les choix
-            for (let j = 0; j < choices.length; j++) {
-                choices[j].style.pointerEvents = 'none';
-            }
-        });
-
+                // Désactive tous les choix
+                for (let j = 0; j < choices.length; j++) {
+                    choices[j].style.pointerEvents = 'none';
+                }
+            });
+        }
         // Ajouter un écouteur d'événements click à chaque choix
         const choices = document.getElementsByClassName('choiceN');
 
