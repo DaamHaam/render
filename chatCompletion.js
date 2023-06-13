@@ -3,6 +3,13 @@
 // probleme a resoudre getclientresponse attend donc quand réponse personnalisée erreur à ce niveau car pas réponse attendue
 // mais non gênante car pas de réponse attendue, prévu.
 
+// erreurs de choix histoire parfois / melange 0 1 2
+
+// TODO :
+// rajout choix libre aux étapes : prompt adapté + qui évalue suite ou perdu....
+// donner exemple de json à chaque étape pr réduire erreurs de parsing
+// indexQuestion dans script.js attention évolue en parallèle / complique projets multiples
+
 // commonJS imposé par serveur nodejs
 const { config } = require("dotenv");
 config();
@@ -195,6 +202,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             }
         }
     }
+    // si réponse personnalisée
     else {
         contentForGPT = texteDeFinGagnePerso;
         console.log("contentForGPT quand réponse personnalisée : " + contentForGPT);
