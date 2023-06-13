@@ -97,14 +97,22 @@ async function sendRequest(content, ageValue) {
 
 
             // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 2 = pas en cas de victoire 
-            if (jsonData.choixA && jsonData.choixA !== "0" && jsonData.choixA !== "2") {
-                formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
-            }
-            if (jsonData.choixB && jsonData.choixB !== "0" && jsonData.choixB !== "2") {
-                formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
-            }
-            if (jsonData.choixC && jsonData.choixC !== "0" && jsonData.choixB !== "2") {
-                formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
+            // et pas en cas de défaite
+            // et si les valeurs sont présentes
+            if (jsonData.choixA && jsonData.choixB && jsonData.choixC) {
+                if (!(jsonData.choixA == "2" && jsonData.choixB == "2" && jsonData.choixC == "2")
+                    && !(jsonData.choixA == "0" && jsonData.choixB == "0" && jsonData.choixC == "0")
+                ) {
+
+                    formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
+
+
+                    formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
+
+
+                    formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
+
+                }
             }
 
         }
