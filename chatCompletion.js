@@ -6,6 +6,7 @@ config();
 const configPrompt = require("./configPrompt.js");
 
 const { Configuration, OpenAIApi } = require("openai");
+const e = require("express");
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -25,7 +26,7 @@ let phraseAgeValue = "";
 
 // modifyState = par défaut true = vraie réponse et pas génération anticipée
 async function getCompletion(messageClient, ageValue, sessionID, modifyState = true) {
-    console.log("messageClient : " + messageClient);
+    console.log("messageClient : " + messageClient + "  modifyState : " + modifyState);
     // console.log("ageValue : " + ageValue);
     // console.log("sessionID : " + sessionID);
 
@@ -34,6 +35,28 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     if (!sessionData) {
         sessionData = createNewSession(sessionID, ageValue);
     }
+
+
+
+
+    let isPersonalizedAnswer = false;
+    let personalizedAnswer = '';
+
+    if (messageClient.length === 1) {
+        // C'est une lettre unique / pas personnalisation
+    } else if (messageClient.startsWith('D - ')) {
+        // C'est la lettre D suivie d'une réponse personnalisée
+        isPersonalizedAnswer = true;
+        personalizedAnswer = messageClient.substring(4); // Cela enlève 'D - ' du début
+        console.log("personalizedAnswer : " + personalizedAnswer);
+
+        messageClient = personalizedAnswer;
+
+    } else {
+        // Autre cas à traiter
+        console.log("nom du héros, ou reponse perso ne commence pas par D - non prévu");
+    }
+
 
     // Stocker le gameID actuel pour vérification ultérieure
     let currentGameID = sessionData.gameID;
@@ -66,20 +89,29 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         .replace("{phraseAgeValue}", phraseAgeValue);
 
 
+
+
     let texteDeFinGagne = configPrompt.texteDeFinGagneTemplate
         .replace("{messageClient}", messageClient)
         .replace("{phraseAgeValue}", phraseAgeValue);
 
 
+    let texteDeFinGagnePerso = configPrompt.texteDeFinGagnePerso
+        .replace("{messageClient}", messageClient)
+        .replace("{phraseAgeValue}", phraseAgeValue);
+
+    if (isPersonalizedAnswer) {
+        console.log("texteGagne isP : " + texteDeFinGagne);
+    }
     let texteDeFinPerdue = configPrompt.texteDeFinPerdueTemplate
         .replace("{messageClient}", messageClient)
         .replace("{phraseAgeValue}", phraseAgeValue);
 
 
-    // est ce que la réponse user est poussée dans l'historique dans ce cas de choix étape ?
 
     // étapes de la conversation, réponse du client sur les choix anticipés
-    if (sessionData.indexQuestion >= 1 && modifyState) {
+    if (sessionData.indexQuestion >= 1 && modifyState && !isPersonalizedAnswer) {
+
         try {
             const clientChoice = await getClientResponse(sessionID, messageClient);
 
@@ -91,7 +123,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             try {
                 clientChoiceParsed = JSON.parse(clientChoice);
             } catch (err) {
-                console.error("Erreur lors du parsage de la réponse de l'assistant:", err);
+                console.error("Erreur lors du parsage de la réponse de l'assistant, contenu " + clientChoice + ", erreur : ", err);
                 errorParse = true;
                 return;
             }
@@ -133,28 +165,38 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         } catch (error) {
             console.error("Une erreur est survenue lors de la récupération du choix du client :", error);
         }
+
+
     }
 
 
     // si c'est la première question et anticipation de la réponse
     let contentForGPT;
 
-    // si c'est la première question
-    if (sessionData.conversationHistory.length === 0) {
-        contentForGPT = promptInitial;
-    } else {
-        // si c'est une question suivante par anticipation
-        if (sessionData.choixPrecedents[`noteChoix${messageClient}`] === 0) {
-            contentForGPT = texteDeFinPerdue;
+
+    if (!isPersonalizedAnswer) {
+        // si c'est la première question
+        if (sessionData.conversationHistory.length === 0) {
+            contentForGPT = promptInitial;
         } else {
-            console.log(sessionData.indexQuestion + " questions vs max : " + nombreDeQuestionsMax)
-            if (sessionData.indexQuestion == nombreDeQuestionsMax) {
-                contentForGPT = texteDeFinGagne;
+            // si c'est une question suivante par anticipation
+            if (sessionData.choixPrecedents[`noteChoix${messageClient}`] === 0) {
+                contentForGPT = texteDeFinPerdue;
             } else {
-                contentForGPT = texteEtape;
+                console.log(sessionData.indexQuestion + " questions vs max : " + nombreDeQuestionsMax)
+                if (sessionData.indexQuestion == nombreDeQuestionsMax) {
+                    contentForGPT = texteDeFinGagne;
+                } else {
+                    contentForGPT = texteEtape;
+                }
             }
         }
     }
+    else {
+        contentForGPT = texteDeFinGagnePerso;
+        console.log("contentForGPT quand réponse personnalisée : " + contentForGPT);
+    }
+
     // console.log("contentForGPT : " + contentForGPT);
 
 
@@ -167,6 +209,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // Si modifyState est vrai, mettre à jour l'historique réel de la session
     if (modifyState) {
         sessionData.conversationHistory = tempConversationHistory;
+        console.log("historique mis a jour avec isP : " + JSON.stringify(sessionData.conversationHistory));
     }
 
 
@@ -236,7 +279,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // en l'occurence la réponse utilisateur est le prompt initial sinon c'est retourné avant
 
     // si gagné, indexQuestion a atteint le nombre de questions max et on ne génère plus de réponses 
-    if (modifyState && sessionData.indexQuestion < nombreDeQuestionsMax + 1) {
+    if (modifyState && sessionData.indexQuestion < nombreDeQuestionsMax + 1 && !isPersonalizedAnswer) {
         console.log("generating");
         generateNextResponses(sessionData, ageValue, sessionID);
     }

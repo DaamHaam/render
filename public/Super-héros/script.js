@@ -95,7 +95,6 @@ async function sendRequest(content, ageValue) {
                 formattedMessage += jsonData.histoire;
             }
 
-
             // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 2 = pas en cas de victoire 
             // et pas en cas de défaite
             // et si les valeurs sont présentes
@@ -103,20 +102,14 @@ async function sendRequest(content, ageValue) {
                 if (!(jsonData.choixA == "2" && jsonData.choixB == "2" && jsonData.choixC == "2")
                     && !(jsonData.choixA == "0" && jsonData.choixB == "0" && jsonData.choixC == "0")
                 ) {
-
                     formattedMessage += "<br><br><div id='choixA' class='choiceN'><b>" + jsonData.choixA + "</b></div>";
-
-
                     formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
-
-
-                    formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "</b></div><br>";
+                    formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "<b></div><br>";
+                    formattedMessage += "<br><div id='customChoice' class='choiceP customChoiceStyle'><input type='text' id='customResponse' class='customResponseStyle'/><button id='customSubmit' class='choiceN customSubmitStyle'>Valider</button></div><br>";
 
                 }
             }
-
         }
-
         formattedMessage += "<br>";
 
         // rajoute une image
@@ -125,8 +118,25 @@ async function sendRequest(content, ageValue) {
         // Utilisez innerHTML au lieu de textContent pour permettre le rendu du HTML
         responseEl.innerHTML = formattedMessage;
 
+        // Ajouter l'écouteur d'événement ici, après que le bouton soit créé
+        document.getElementById('customSubmit').addEventListener('click', () => {
+            const customResponse = document.getElementById('customResponse').value;
+            sendRequest("D - " + customResponse);
+
+            // Supprime la classe "selected" de tous les choix
+            for (let j = 0; j < choices.length; j++) {
+                choices[j].classList.remove('selected');
+            }
+
+            // Désactive tous les choix
+            for (let j = 0; j < choices.length; j++) {
+                choices[j].style.pointerEvents = 'none';
+            }
+        });
+
         // Ajouter un écouteur d'événements click à chaque choix
         const choices = document.getElementsByClassName('choiceN');
+
         for (let i = 0; i < choices.length; i++) {
             choices[i].addEventListener('click', () => {
                 // Envoie la dernière lettre de l'id (A, B ou C) à sendRequest
@@ -144,7 +154,6 @@ async function sendRequest(content, ageValue) {
                 for (let j = 0; j < choices.length; j++) {
                     choices[j].style.pointerEvents = 'none';
                 }
-
             });
         }
     }
@@ -212,6 +221,8 @@ submitEl.addEventListener('click', async () => {
     }
 });
 
+
+
 function activateResetMode() {
     // mettre le bouton en mode RESET = quand on joue
     resetMode = true;
@@ -225,11 +236,12 @@ function desactivateResetMode() {
     // Si le bouton est en mode "RESET", réinitialiser l'interface = quand on recommence
     resetMode = false;
     questionEl.disabled = false;
-    submitEl.textContent = 'Valider';
+    submitEl.textContent = 'Générer';
     submitEl.style.backgroundColor = ""; // réinitialise la couleur de fond
     submitEl.style.color = ""; // réinitialise la couleur du texte
     responseEl.textContent = '';
     questionEl.value = '';
+    indexQuestion = 0;
 }
 
 // Add "keyup" event listener to questionEl POUR TOUCHE ENTREE

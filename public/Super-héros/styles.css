@@ -151,6 +151,24 @@
       font-size: 1.4rem;
   }
 
+  .customResponseStyle {
+      flex-grow: 1;
+      font-size: 1em;
+      font-weight: bold;
+      padding-left: 5px;
+  }
+
+  .customSubmitStyle {
+      color: black;
+      background-color: white;
+      font-weight: bold;
+      margin-left: 5px;
+  }
+
+  .customChoiceStyle {
+      display: flex;
+  }
+
   /* .loading {
       position: relative;
       height: 4px;
