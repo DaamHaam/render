@@ -1,5 +1,8 @@
 
 
+// probleme a resoudre getclientresponse attend donc quand réponse personnalisée erreur à ce niveau car pas réponse attendue
+// mais non gênante car pas de réponse attendue, prévu.
+
 // commonJS imposé par serveur nodejs
 const { config } = require("dotenv");
 config();

@@ -111,7 +111,7 @@ async function sendRequest(content, ageValue) {
                     formattedMessage += "<br><div id='choixB' class='choiceN'><b>" + jsonData.choixB + "</b></div>";
                     formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "<b></div><br>";
                     // si la question est la xx, ajouter un bouton pour la réponse personnalisée
-                    if (indexQuestion === 3) {
+                    if (indexQuestion < 4) {
                         persoButton = true;
                         formattedMessage += "<div id='customChoice' class='choiceP customChoiceStyle'><input type='text' id='customResponse' class='customResponseStyle'/><button id='customSubmit' class='choiceN customSubmitStyle'><i class='fas fa-paper-plane'></i></button></div><br>";
 
