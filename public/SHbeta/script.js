@@ -96,7 +96,6 @@ async function sendRequest(content, ageValue) {
                 formattedMessage += jsonData.histoire;
             }
 
-
             // effectuer cela que si tous les jsonData.choix A B et C ne sont pas toutes égal à 2 = pas en cas de victoire 
             // et pas en cas de défaite
             // et si les valeurs sont présentes
@@ -109,7 +108,8 @@ async function sendRequest(content, ageValue) {
                     formattedMessage += "<br><div id='choixC' class='choiceN'><b>" + jsonData.choixC + "<b></div><br>";
                     if (indexQuestion === 3) {
                         persoButton = true;
-                        formattedMessage += "<br><div id='customChoice' class='choiceP customChoiceStyle'><input type='text' id='customResponse' class='customResponseStyle'/><button id='customSubmit' class='choiceN customSubmitStyle'>Valider</button></div><br>";
+                        formattedMessage += "<div id='customChoice' class='choiceP customChoiceStyle'><input type='text' id='customResponse' class='customResponseStyle'/><button id='customSubmit' class='choiceN customSubmitStyle'><i class='fas fa-paper-plane'></i></button></div><br>";
+
                     }
                 }
             }
