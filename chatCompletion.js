@@ -214,6 +214,10 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // Copier l'historique de la conversation
     let tempConversationHistory = [...sessionData.conversationHistory];
 
+    // Ajouter le nouveau message de rôle système à l'historique temporaire
+    const systemMessage = { role: "system", content: "Ta tâche est de créer un jeu vidéo textuel, où le joueur choisit la suite de l'histoire pour le personnage principal. Tu devras fournir les réponses uniquement en format JSON valide." };
+    tempConversationHistory.unshift(systemMessage);
+
     // Ajouter le nouveau message de l'utilisateur à l'historique temporaire
     tempConversationHistory.push({ role: "user", content: contentForGPT });
 
@@ -224,12 +228,46 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     }
 
 
+
+
+
+    const schema = {
+        "type": "object",
+        "properties": {
+            "histoire": { "type": "string" },
+            "choixA": { "type": "string" },
+            "choixB": { "type": "string" },
+            "choixC": { "type": "string" },
+            "noteChoixA": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "noteChoixB": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "noteChoixC": { "type": "integer", "minimum": 0, "maximum": 2 }
+        },
+        "required": ["histoire", "choixA", "choixB", "choixC", "noteChoixA", "noteChoixB", "noteChoixC"]
+    };
+
+
+    // const completion = await openai.createChatCompletion({
+    //     model: "gpt-3.5-turbo-0613",
+    //     messages: tempConversationHistory,
+    //     functions: [{ "name": "suiteJeu", "parameters": schema }],
+    //     function_call: { "name": "suiteJeu" },
+    //     temperature: 0.8
+    // });
+
+
+
     // Appel de l'API avec l'historique temporaire
     const completion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0613",
         messages: tempConversationHistory,
         temperature: 0.8
     });
+
+
+
+
+
+
 
     // Vérifier si le gameID actuel correspond à celui de l'API
     if (currentGameID !== sessionData.gameID) {
