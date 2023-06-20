@@ -215,7 +215,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     let tempConversationHistory = [...sessionData.conversationHistory];
 
     // Ajouter le nouveau message de rôle système à l'historique temporaire
-    const systemMessage = { role: "system", content: "Ta tâche est de créer un jeu vidéo textuel, où le joueur choisit la suite de l'histoire pour le personnage principal. Tu devras fournir les réponses uniquement en format JSON valide." };
+    const systemMessage = { role: "system", content: "Ta tâche est de créer un jeu vidéo textuel, où le joueur choisit la suite de l'histoire pour le personnage principal." };
     tempConversationHistory.unshift(systemMessage);
 
     // Ajouter le nouveau message de l'utilisateur à l'historique temporaire
@@ -226,8 +226,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         sessionData.conversationHistory = tempConversationHistory;
         // console.log("historique mis a jour avec isP : " + JSON.stringify(sessionData.conversationHistory));
     }
-
-
 
 
 
@@ -265,6 +263,24 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
 
 
+    let errorParse = false;
+    // Parsing de la réponse de l'assistant
+    // non parsed texte
+    // parsed objet javascript exploitable
+    let reponseAssistantNonParsed = completion.data.choices[0].message.content;
+    let reponseAssistantParsed;
+
+    try {
+        reponseAssistantParsed = JSON.parse(reponseAssistantNonParsed);
+    } catch (err) {
+        console.error("Erreur lors du parsage de la réponse de l'assistant:", err);
+        errorParse = true;
+        return;
+    }
+
+    console.log("reponse Non Parsed : ", reponseAssistantNonParsed);
+
+    console.log("reponseAssistant Parsed ", reponseAssistantParsed);
 
 
 
@@ -276,20 +292,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     }
 
 
-    let errorParse = false;
-    // Parsing de la réponse de l'assistant
-    let reponseAssistant;
-    try {
-        reponseAssistant = JSON.parse(completion.data.choices[0].message.content);
-    } catch (err) {
-        console.error("Erreur lors du parsage de la réponse de l'assistant:", err);
-        errorParse = true;
-        return;
-    }
-
-    console.log("completion data choices message content : ", completion.data.choices[0].message.content);
-
-    console.log("reponseAssistant ", reponseAssistant);
 
 
 
@@ -301,9 +303,9 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         // modifer index question choixprecedents et conversation history que si vraie réponse et pas hypothèse
         if (modifyState) {
             sessionData.choixPrecedents = {
-                noteChoixA: reponseAssistant.noteChoixA,
-                noteChoixB: reponseAssistant.noteChoixB,
-                noteChoixC: reponseAssistant.noteChoixC
+                noteChoixA: reponseAssistantParsed.noteChoixA,
+                noteChoixB: reponseAssistantParsed.noteChoixB,
+                noteChoixC: reponseAssistantParsed.noteChoixC
             };
 
             // incr 1 index question mais aussi plus haut pour etapes
