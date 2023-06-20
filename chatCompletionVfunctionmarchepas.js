@@ -1,5 +1,19 @@
 
 
+// oui voilà il me reste un problème  au niveau des réponses suivantes  car à chaque fois  dès que une des trois réponses suivantes et générée  j'obtiens cette nouvelle réponse générée et les deux autres réponses ne changent pas de valeur elle garde les anciennes valeurs  il faudra donc voir  pourquoi
+// Il semble y avoir un problème avec la mise à jour des valeurs des réponses suivantes dans votre code. Lorsque vous générez les réponses suivantes pour les choix A, B et C, vous stockez ces réponses dans sessionData.nextResponses en utilisant les clés 'A', 'B' et 'C'. Cependant, lorsque vous utilisez ces valeurs ultérieurement, vous obtenez toujours les anciennes valeurs.
+
+// Voici quelques points à vérifier pour résoudre ce problème :
+
+// Assurez-vous que sessionData.nextResponses est correctement initialisé au début de la session. Si cette propriété n'est pas initialisée, les nouvelles réponses ne seront pas stockées correctement.
+
+// Vérifiez que vous utilisez les clés correctes pour accéder aux réponses suivantes dans sessionData.nextResponses. Assurez-vous que les clés 'A', 'B' et 'C' sont utilisées de manière cohérente tout au long de votre code.
+
+// Vérifiez que la fonction getCompletion retourne effectivement les nouvelles réponses attendues pour chaque choix. Assurez-vous qu'elle est correctement implémentée et qu'elle renvoie les valeurs mises à jour pour chaque choix.
+
+// En examinant attentivement ces points, vous devriez pouvoir résoudre le problème et mettre à jour correctement les réponses suivantes pour chaque choix.
+
+
 // probleme a resoudre getclientresponse attend donc quand réponse personnalisée erreur à ce niveau car pas réponse attendue
 // mais non gênante car pas de réponse attendue, prévu.
 
@@ -224,12 +238,44 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     }
 
 
-    // Appel de l'API avec l'historique temporaire
+    const schema = {
+        "type": "object",
+        "properties": {
+            "histoire": { "type": "string" },
+            "choixA": { "type": "string" },
+            "choixB": { "type": "string" },
+            "choixC": { "type": "string" },
+            "noteChoixA": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "noteChoixB": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "noteChoixC": { "type": "integer", "minimum": 0, "maximum": 2 }
+        },
+        "required": ["histoire", "choixA", "choixB", "choixC", "noteChoixA", "noteChoixB", "noteChoixC"]
+    };
+
+
     const completion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0613",
         messages: tempConversationHistory,
-        temperature: 0.8
+        functions: [{ "name": "suiteJeu", "parameters": schema }],
+        function_call: { "name": "suiteJeu" },
+        // temperature: 0
     });
+
+
+    let response = completion.data.choices[0].message.function_call.arguments;
+
+    console.log(response);
+
+
+
+    // // Appel de l'API avec l'historique temporaire
+    // const completion = await openai.createChatCompletion({
+    //     model: "gpt-3.5-turbo",
+    //     messages: tempConversationHistory
+    // });
+
+
+
 
     // Vérifier si le gameID actuel correspond à celui de l'API
     if (currentGameID !== sessionData.gameID) {
@@ -238,23 +284,25 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     }
 
 
+
+
+
+
     let errorParse = false;
     // Parsing de la réponse de l'assistant
     let reponseAssistant;
     try {
-        reponseAssistant = JSON.parse(completion.data.choices[0].message.content);
+        reponseAssistant = JSON.parse(response);
     } catch (err) {
         console.error("Erreur lors du parsage de la réponse de l'assistant:", err);
         errorParse = true;
         return;
     }
-
-    console.log("completion data choices message content : ", completion.data.choices[0].message.content);
-
-    console.log("reponseAssistant ", reponseAssistant);
+    // console.log("reponseAssistant ", reponseAssistant);
+    // console.log("completion data : ", completion.data.choices[0].message.content);
 
 
-
+    // A REMETTRE
     let currentResponse;
 
     // si le parsing est ok, stocker quels sont les bons ou mauvais choix
@@ -267,6 +315,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
                 noteChoixB: reponseAssistant.noteChoixB,
                 noteChoixC: reponseAssistant.noteChoixC
             };
+            console.log("choixPrecedents : " + JSON.stringify(sessionData.choixPrecedents));
 
             // incr 1 index question mais aussi plus haut pour etapes
             sessionData.indexQuestion += 1;
@@ -274,18 +323,24 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
 
             // rajoute la réponse de l'assistant dans l'historique uniquement si c'est une vraie réponse
-            sessionData.conversationHistory.push({ role: "assistant", content: completion.data.choices[0].message.content });
+            sessionData.conversationHistory.push({ role: "assistant", content: completion.data.choices[0].message.function_call.arguments });
             console.log("historique mis a jour avec isP BIS : " + JSON.stringify(sessionData.conversationHistory));
         }
 
         // stocke la réponse première de l'assistant dans une variable
-        currentResponse = completion.data.choices[0].message.content;
+        currentResponse = response;
     }
 
     // si le parsing est en erreur
     else {
         return JSON.stringify({ "erreur": "JSON", "message": "Erreur parsing coté serveur" });
     }
+
+
+
+
+
+
 
     // Générer les réponses pour les choix suivants si c'est la première question : une demande user et une reponse assistant soit 2 éléments dans l'historique
 
@@ -299,6 +354,12 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         console.log("generating");
         generateNextResponses(sessionData, ageValue, sessionID);
     }
+    console.log("currentResponse : " + currentResponse);
+    console.log("Type de données de la réponse :", typeof currentResponse);
+
+    // return JSON.stringify({ "erreur": "JSON", "message": "Erreur parsing coté serveur" });
+
+
 
     return currentResponse;
 
@@ -319,6 +380,8 @@ function resetConversation(sessionID) {
 }
 
 async function generateNextResponses(sessionData, ageValue, sessionID) {
+
+    // utile ?
     // sessionData.nextResponses = {};
 
     // console.log("indexQuestion dans generateNext : ", sessionData.indexQuestion);
