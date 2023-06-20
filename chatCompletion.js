@@ -147,7 +147,10 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
                 sessionData.choixPrecedents = {
                     noteChoixA: clientChoiceParsed.noteChoixA,
                     noteChoixB: clientChoiceParsed.noteChoixB,
-                    noteChoixC: clientChoiceParsed.noteChoixC
+                    noteChoixC: clientChoiceParsed.noteChoixC,
+                    choixA: clientChoiceParsed.choixA,
+                    choixB: clientChoiceParsed.choixB,
+                    choixC: clientChoiceParsed.choixC
                 }
 
                 // rajoute la réponse de l'assistant dans l'historique
@@ -214,11 +217,9 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // Copier l'historique de la conversation
     let tempConversationHistory = [...sessionData.conversationHistory];
 
-    // Ajouter le nouveau message de rôle système à l'historique temporaire
-    const systemMessage = { role: "system", content: "Ta tâche est de créer un jeu vidéo textuel, où le joueur choisit la suite de l'histoire pour le personnage principal." };
-    tempConversationHistory.unshift(systemMessage);
 
     // Ajouter le nouveau message de l'utilisateur à l'historique temporaire
+
     tempConversationHistory.push({ role: "user", content: contentForGPT });
 
     // Si modifyState est vrai, mettre à jour l'historique réel de la session
@@ -244,22 +245,30 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     };
 
 
-    // const completion = await openai.createChatCompletion({
-    //     model: "gpt-3.5-turbo-0613",
-    //     messages: tempConversationHistory,
-    //     functions: [{ "name": "suiteJeu", "parameters": schema }],
-    //     function_call: { "name": "suiteJeu" },
-    //     temperature: 0.8
-    // });
 
+    console.log("tempConvHistory", tempConversationHistory);
 
-
-    // Appel de l'API avec l'historique temporaire
     const completion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo-0613",
         messages: tempConversationHistory,
+        functions: [{ "name": "suiteJeu", "parameters": schema }],
+        function_call: { "name": "suiteJeu" },
         temperature: 0.8
     });
+
+    let reponseAssistantNonParsed = completion.data.choices[0].message.function_call.arguments;
+
+
+
+
+    // // Appel de l'API avec l'historique temporaire
+    // const completion = await openai.createChatCompletion({
+    //     model: "gpt-3.5-turbo-0613",
+    //     messages: tempConversationHistory,
+    //     temperature: 0.8
+    // });
+    // va avec le modèle sans fonction :
+    // let reponseAssistantNonParsed = completion.data.choices[0].message.content;
 
 
 
@@ -267,7 +276,9 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // Parsing de la réponse de l'assistant
     // non parsed texte
     // parsed objet javascript exploitable
-    let reponseAssistantNonParsed = completion.data.choices[0].message.content;
+
+
+
     let reponseAssistantParsed;
 
     try {
@@ -278,7 +289,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         return;
     }
 
-    console.log("reponse Non Parsed : ", reponseAssistantNonParsed);
+    // console.log("reponse Non Parsed : ", reponseAssistantNonParsed);
 
     console.log("reponseAssistant Parsed ", reponseAssistantParsed);
 
@@ -305,7 +316,10 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             sessionData.choixPrecedents = {
                 noteChoixA: reponseAssistantParsed.noteChoixA,
                 noteChoixB: reponseAssistantParsed.noteChoixB,
-                noteChoixC: reponseAssistantParsed.noteChoixC
+                noteChoixC: reponseAssistantParsed.noteChoixC,
+                choixA: reponseAssistantParsed.choixA,
+                choixB: reponseAssistantParsed.choixB,
+                choixC: reponseAssistantParsed.choixC
             };
 
             // incr 1 index question mais aussi plus haut pour etapes
@@ -314,12 +328,12 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
 
             // rajoute la réponse de l'assistant dans l'historique uniquement si c'est une vraie réponse
-            sessionData.conversationHistory.push({ role: "assistant", content: completion.data.choices[0].message.content });
+            sessionData.conversationHistory.push({ role: "assistant", content: reponseAssistantNonParsed });
             console.log("historique mis a jour avec isP BIS : " + JSON.stringify(sessionData.conversationHistory));
         }
 
         // stocke la réponse première de l'assistant dans une variable
-        currentResponse = completion.data.choices[0].message.content;
+        currentResponse = reponseAssistantNonParsed;
     }
 
     // si le parsing est en erreur
@@ -428,6 +442,8 @@ function createNewSession(sessionID, ageValue) {
         ageLocal: ageValue,
         gameID: generateGameID(),
     };
+    const systemMessage = { role: "system", content: "Ta tâche est de créer un jeu vidéo textuel, où le joueur choisit la suite de l'histoire pour le personnage principal. A chaque étape tu devras raconter la suite de l'histoire correspondant au choix du joueur, ne remets jamais une proposition déjà faite au préalable." };
+    sessionData.conversationHistory.push(systemMessage);
     sessions[sessionID] = sessionData;
     return sessionData;
 }
