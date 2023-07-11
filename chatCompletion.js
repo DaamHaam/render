@@ -33,7 +33,6 @@ let nombreDeQuestionsMax = configPrompt.nombreDeQuestionsMax;
 
 let phraseAgeValue = "";
 
-
 // modifyState = par défaut true = vraie réponse et pas génération anticipée
 async function getCompletion(messageClient, ageValue, sessionID, modifyState = true) {
     console.log("messageClient : " + messageClient + "  modifyState : " + modifyState);
@@ -45,9 +44,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     if (!sessionData) {
         sessionData = createNewSession(sessionID, ageValue);
     }
-
-
-
 
     let isPersonalizedAnswer = false;
     let personalizedAnswer = '';
@@ -67,7 +63,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         console.log("nom du héros, ou reponse perso ne commence pas par D - non prévu");
     }
 
-
     // Stocker le gameID actuel pour vérification ultérieure
     let currentGameID = sessionData.gameID;
 
@@ -84,11 +79,13 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     }
 
     // adaptation des prompts
-    let promptInitial = configPrompt.promptInitialTemplate
+    let promptInitialSystem = configPrompt.promptInitialSystemTemplate
         .replace("{nombreDeChoix}", nombreDeChoix)
         .replace("{badChoiceIndex}", badChoiceIndex)
-        .replace("{messageClient}", messageClient)
         .replace("{phraseAgeValue}", phraseAgeValue);
+
+    let promptInitialUser = configPrompt.promptInitialUserTemplate
+        .replace("{messageClient}", messageClient);
 
     // console.log("promptInitial : " + promptInitial);
 
@@ -97,9 +94,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         .replace("{badChoiceIndex}", badChoiceIndex)
         .replace("{messageClient}", messageClient)
         .replace("{phraseAgeValue}", phraseAgeValue);
-
-
-
 
     let texteDeFinGagne = configPrompt.texteDeFinGagneTemplate
         .replace("{messageClient}", messageClient)
@@ -116,8 +110,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     let texteDeFinPerdue = configPrompt.texteDeFinPerdueTemplate
         .replace("{messageClient}", messageClient)
         .replace("{phraseAgeValue}", phraseAgeValue);
-
-
 
     // étapes de la conversation, réponse du client sur les choix anticipés
     if (sessionData.indexQuestion >= 1 && modifyState && !isPersonalizedAnswer) {
@@ -142,7 +134,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
             // stocker les choix précédents pour les réponses suivantes, générer suite,etc...
             if (sessionData.indexQuestion < nombreDeQuestionsMax && !(clientChoiceParsed.choixA === "0" && clientChoiceParsed.choixB === "0" && clientChoiceParsed.choixC === "0")) {
 
-
                 // MAJ précédent choix pour réponses suivantes adaptées
                 sessionData.choixPrecedents = {
                     noteChoixA: clientChoiceParsed.noteChoixA,
@@ -152,54 +143,48 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
                     choixB: clientChoiceParsed.choixB,
                     choixC: clientChoiceParsed.choixC
                 }
-
                 // rajoute la réponse de l'assistant dans l'historique
                 // sessionData.conversationHistory.push({ role: "user", content: texteEtape });
                 // console.log("texteEtape : " + texteEtape);
                 // rajoute la réponse de l'assistant dans l'historique
                 sessionData.conversationHistory.push({ role: "assistant", content: clientChoice });
 
-
-
                 sessionData.indexQuestion += 1;
                 console.log("indexQuestion passe à : ", sessionData.indexQuestion);
-
 
                 // lancer la génération des réponses suivantes hypothétiques
                 // 
                 generateNextResponses(sessionData, ageValue, sessionID);
 
             }
-
             // console.log("historique étape : " + JSON.stringify(sessionData.conversationHistory));
 
             return clientChoice;
-
         } catch (error) {
             console.error("Une erreur est survenue lors de la récupération du choix du client :", error);
         }
-
-
     }
-
-
     // si c'est la première question et anticipation de la réponse
     let contentForGPT;
 
-
     if (!isPersonalizedAnswer) {
-        // si c'est la première question
-        if (sessionData.conversationHistory.length === 0) {
-            contentForGPT = promptInitial;
+        // si c'est la première question, juste le message system
+        if (sessionData.conversationHistory.length === 1) {
+            // remplacer le message system par le prompt initial
+            // sessionData.conversationHistory[0].content = promptInitialSystem;
+            contentForGPT = promptInitialUser;
         } else {
             // si c'est une question suivante par anticipation
             if (sessionData.choixPrecedents[`noteChoix${messageClient}`] === 0) {
+                // sessionData.conversationHistory[0].content = "Ceci est une suite précalculéée - mettre texteEtape perdu.";
                 contentForGPT = texteDeFinPerdue;
             } else {
                 console.log(sessionData.indexQuestion + " questions vs max : " + nombreDeQuestionsMax)
                 if (sessionData.indexQuestion == nombreDeQuestionsMax) {
+                    // sessionData.conversationHistory[0].content = "Ceci est une suite précalculéée - mettre texteEtape gagné.";
                     contentForGPT = texteDeFinGagne;
                 } else {
+                    // sessionData.conversationHistory[0].content = "Ceci est une suite précalculéée - mettre texteEtape normal.";
                     contentForGPT = texteEtape;
                 }
             }
@@ -210,26 +195,23 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         contentForGPT = texteDeFinGagnePerso;
         console.log("contentForGPT quand réponse personnalisée : " + contentForGPT);
     }
-
     // console.log("contentForGPT : " + contentForGPT);
-
-
     // Copier l'historique de la conversation
+
     let tempConversationHistory = [...sessionData.conversationHistory];
-
-
     // Ajouter le nouveau message de l'utilisateur à l'historique temporaire
 
     tempConversationHistory.push({ role: "user", content: contentForGPT });
+
+    // Modifier le contenu du message système
+    tempConversationHistory[0].content = promptInitialSystem;;
+
 
     // Si modifyState est vrai, mettre à jour l'historique réel de la session
     if (modifyState) {
         sessionData.conversationHistory = tempConversationHistory;
         // console.log("historique mis a jour avec isP : " + JSON.stringify(sessionData.conversationHistory));
     }
-
-
-
     const schema = {
         "type": "object",
         "properties": {
@@ -244,8 +226,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         "required": ["histoire", "choixA", "choixB", "choixC", "noteChoixA", "noteChoixB", "noteChoixC"]
     };
 
-
-
     console.log("tempConvHistory", tempConversationHistory);
 
     const completion = await openai.createChatCompletion({
@@ -255,12 +235,7 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
         function_call: { "name": "suiteJeu" },
         temperature: 0.8
     });
-
     let reponseAssistantNonParsed = completion.data.choices[0].message.function_call.arguments;
-
-
-
-
     // // Appel de l'API avec l'historique temporaire
     // const completion = await openai.createChatCompletion({
     //     model: "gpt-3.5-turbo-0613",
@@ -270,14 +245,10 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
     // va avec le modèle sans fonction :
     // let reponseAssistantNonParsed = completion.data.choices[0].message.content;
 
-
-
     let errorParse = false;
     // Parsing de la réponse de l'assistant
     // non parsed texte
     // parsed objet javascript exploitable
-
-
 
     let reponseAssistantParsed;
 
@@ -293,21 +264,13 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
     console.log("reponseAssistant Parsed ", reponseAssistantParsed);
 
-
-
-
     // Vérifier si le gameID actuel correspond à celui de l'API
     if (currentGameID !== sessionData.gameID) {
         // Le jeu a été réinitialisé entre-temps, donc ignorer cette réponse
         return JSON.stringify({ "error": "gameID_mismatch", "message": "Le jeu a été réinitialisé entre-temps, donc cette réponse a été ignorée." });
     }
 
-
-
-
-
     let currentResponse;
-
     // si le parsing est ok, stocker quels sont les bons ou mauvais choix
     if (errorParse == false) {
 
@@ -321,21 +284,16 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
                 choixB: reponseAssistantParsed.choixB,
                 choixC: reponseAssistantParsed.choixC
             };
-
             // incr 1 index question mais aussi plus haut pour etapes
             sessionData.indexQuestion += 1;
             console.log("indexQuestion passe à : ", sessionData.indexQuestion);
-
-
             // rajoute la réponse de l'assistant dans l'historique uniquement si c'est une vraie réponse
             sessionData.conversationHistory.push({ role: "assistant", content: reponseAssistantNonParsed });
             console.log("historique mis a jour avec isP BIS : " + JSON.stringify(sessionData.conversationHistory));
         }
-
         // stocke la réponse première de l'assistant dans une variable
         currentResponse = reponseAssistantNonParsed;
     }
-
     // si le parsing est en erreur
     else {
         return JSON.stringify({ "erreur": "JSON", "message": "Erreur parsing coté serveur" });
@@ -358,20 +316,6 @@ async function getCompletion(messageClient, ageValue, sessionID, modifyState = t
 
 }
 
-function resetConversation(sessionID) {
-    // Vérifiez d'abord si la session existe
-    let sessionData = sessions[sessionID];
-    if (sessionData) {
-        sessionData.conversationHistory = [];
-        sessionData.indexQuestion = 0;
-        sessionData.choixPrecedents = {};
-        sessionData.gameID = generateGameID(); // Générer un nouveau gameID lors de la réinitialisation
-        console.log("conversation effacée");
-    } else {
-        console.log("Aucune session active avec l'ID donné");
-    }
-}
-
 async function generateNextResponses(sessionData, ageValue, sessionID) {
     // sessionData.nextResponses = {};
 
@@ -383,12 +327,8 @@ async function generateNextResponses(sessionData, ageValue, sessionID) {
             const nextResponsePromise = getCompletion(choice, ageValue, sessionID, false);
             return nextResponsePromise;
         });
-
         // console.log("Longueur de l'historique de conversation une fois remis  après encore : ", sessionData.conversationHistory.length);
-
         const nextResponses = await Promise.all(nextResponsesPromises);
-
-
         sessionData.nextResponses = {
             'A': nextResponses[0],
             'B': nextResponses[1],
@@ -422,10 +362,8 @@ async function getClientResponse(sessionID, clientChoice) {
 
     let userResponse = ("Mon choix est " + clientChoice + ".")
     sessionData.conversationHistory.push({ role: "user", content: userResponse });
-
     // Supprimer les réponses anticipées pour le prochain tour
     delete sessionData.nextResponses;
-
     return response;
 }
 
@@ -433,6 +371,30 @@ async function getClientResponse(sessionID, clientChoice) {
 function generateGameID() {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
+// function resetConversation(sessionID) {
+//     // Vérifiez d'abord si la session existe
+//     let sessionData = sessions[sessionID];
+//     if (sessionData) {
+//         sessionData.conversationHistory = [];
+//         sessionData.indexQuestion = 0;
+//         sessionData.choixPrecedents = {};
+//         sessionData.gameID = generateGameID(); // Générer un nouveau gameID lors de la réinitialisation
+//         console.log("conversation effacée");
+//     } else {
+//         console.log("Aucune session active avec l'ID donné");
+//     }
+// }
+function resetConversation(sessionID) {
+    // Vérifiez d'abord si la session existe
+    if (sessions[sessionID]) {
+        let ageValue = sessions[sessionID].ageLocal;  // Récupérez l'âge enregistré dans la session
+        createNewSession(sessionID, ageValue);  // Recréer la session avec le même âge
+        console.log("conversation effacée");
+    } else {
+        console.log("Aucune session active avec l'ID donné");
+    }
+}
+
 
 function createNewSession(sessionID, ageValue) {
     let sessionData = {
@@ -442,13 +404,11 @@ function createNewSession(sessionID, ageValue) {
         ageLocal: ageValue,
         gameID: generateGameID(),
     };
-    const systemMessage = { role: "system", content: "Ta tâche est de créer un jeu vidéo textuel, où le joueur choisit la suite de l'histoire pour le personnage principal. A chaque étape tu devras raconter la suite de l'histoire correspondant au choix du joueur, ne remets jamais une proposition déjà faite au préalable." };
+    const systemMessage = { role: "system", content: "Ta tâche on verra bien ce que c'est plus tard." };
     sessionData.conversationHistory.push(systemMessage);
+
+    // ici modifier le contenu de system
     sessions[sessionID] = sessionData;
     return sessionData;
 }
-
-
-
-
 module.exports = { getCompletion, resetConversation };
